@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: qwelp/php-project-lvl2
+      - uses: actions/checkout@v2
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -21,7 +21,7 @@ jobs:
       - name: Run test
         run: make test
        - name: Run test & publish code coverage
-       uses: qwelp/php-project-lvl2
+       uses: paambaati/codeclimate-action@v2.6.0
        env:
          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
        with:
