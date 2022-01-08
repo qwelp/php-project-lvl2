@@ -22,4 +22,3 @@ test-coverage:
 
 test-html:
 	composer exec --verbose phpunit tests -- --coverage-html coverage
-	

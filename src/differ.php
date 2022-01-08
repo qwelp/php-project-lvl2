@@ -15,10 +15,14 @@ function genDiff(string $firstFile, string $secondFile): string
         return '';
     }
 
+    $objFirstFile = decodeJsonFileDiff($firstFile);
+    $objSecondFile = decodeJsonFileDiff($secondFile);
+
+
     return "123";
 }
 
-function decodeJsonDiff(string $file): array
+function decodeJsonFileDiff(string $file): array
 {
     return json_decode($file, true);
 }
