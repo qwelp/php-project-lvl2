@@ -8,14 +8,13 @@ use function Differ\Differ\genDiff;
 
 class DefferTest extends TestCase
 {
-    const PATH_FIXTURE = __DIR__ . "/fixtures/";
-    const FILE_1 = self::PATH_FIXTURE . "file1.json";
-    const FILE_2 = self::PATH_FIXTURE . "file2.json";
-    const FILE_EMPTY = self::PATH_FIXTURE . "fileEmpty.json";
-
     public function testDeffer(): void
     {
-        $diff = genDiff(self::FILE_1, self::FILE_2);
+        $pathFixture = __DIR__ . "/fixtures/";
+        $file1 = $pathFixture . "file1.json";
+        $file2 = $pathFixture . "file2.json";
+
+        $diff = genDiff($file1, $file2);
 
         $expected = "{" . PHP_EOL;
         $expected .= "    host: hexlet.io" . PHP_EOL;
@@ -24,15 +23,27 @@ class DefferTest extends TestCase
         $expected .= "  - proxy: 123.234.53.22" . PHP_EOL;
         $expected .= "  - follow: " . PHP_EOL;
         $expected .= "  + verbose: 1" . PHP_EOL;
-        $expected .= "}". PHP_EOL;
+        $expected .= "}" . PHP_EOL;
 
         $this->assertEquals($expected, $diff);
     }
 
-    public function testException()
+    public function testExceptionFileNotFound(): void
     {
+        $pathFixture = __DIR__ . "/fixtures/";
+        $file2 = $pathFixture . "file2.json";
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('File not found.');
-        genDiff('', self::FILE_2);
+        genDiff('', $file2);
+    }
+
+    public function testExceptionFileEmpty(): void
+    {
+        $pathFixture = __DIR__ . "/fixtures/";
+        $file1 = $pathFixture . "file1.json";
+        $fileEmpty = $pathFixture . "fileEmpty.json";
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('File empty.');
+        genDiff($file1, $fileEmpty);
     }
 }

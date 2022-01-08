@@ -10,6 +10,11 @@ function genDiff(string $firstFile, string $secondFile): string
 
     $firstFile = file_get_contents($firstFile);
     $secondFile = file_get_contents($secondFile);
+
+    if (empty($firstFile) || empty($secondFile)) {
+        throw new \Exception("File empty.");
+    }
+
     $objFirstFile = decodeJsonFileDiff($firstFile);
     $objSecondFile = decodeJsonFileDiff($secondFile);
 
