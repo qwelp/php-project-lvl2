@@ -11,8 +11,8 @@ function genDiff(string $firstFile, string $secondFile): string
         return '';
     }
 
-    $objFirstFile = json_decode($firstFile, true);
-    $objSecondFile = json_decode($secondFile, true);
+    $objFirstFile = decodeJsonDiff($firstFile);
+    $objSecondFile = decodeJsonDiff($secondFile);
 
     $result = [];
     $result[] = "{";
@@ -41,4 +41,9 @@ function genDiff(string $firstFile, string $secondFile): string
     $result[] = "}";
 
     return implode(PHP_EOL, $result) . PHP_EOL;
+}
+
+function decodeJsonDiff($file)
+{
+    return json_decode($file, true);
 }
