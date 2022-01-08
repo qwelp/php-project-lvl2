@@ -24,7 +24,6 @@ function genDiff(string $firstFile, string $secondFile): string
 function renderDiff(array $firstFile, array $secondFile): string
 {
     $result = [];
-    $result[] = "{";
 
     foreach ($firstFile as $k => $v) {
         if (isset($secondFile[$k])) {
@@ -47,9 +46,7 @@ function renderDiff(array $firstFile, array $secondFile): string
         }
     }
 
-    $result[] = "}";
-
-    return implode(PHP_EOL, $result) . PHP_EOL;
+    return "{" . PHP_EOL . implode(PHP_EOL, $result) . PHP_EOL . "}" . PHP_EOL;
 }
 
 function decodeJsonFileDiff(string $file): array
