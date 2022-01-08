@@ -43,7 +43,7 @@ function genDiff(string $firstFile, string $secondFile): string
     return implode(PHP_EOL, $result) . PHP_EOL;
 }
 
-function decodeJsonDiff($file)
+function decodeJsonDiff(string $file): array
 {
     return json_decode($file, true);
 }
