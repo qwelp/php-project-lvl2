@@ -15,7 +15,7 @@ function genDiff(string $firstFile, string $secondFile): string
         return '';
     }
 
-    return "";
+    return "123";
 }
 
 function decodeJsonDiff(string $file): array
