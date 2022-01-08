@@ -15,36 +15,7 @@ function genDiff(string $firstFile, string $secondFile): string
         return '';
     }
 
-    $objFirstFile = decodeJsonDiff($firstFile);
-    $objSecondFile = decodeJsonDiff($secondFile);
-
-    $result = [];
-    $result[] = "{";
-
-    foreach ($objFirstFile as $k => $v) {
-        if (isset($objSecondFile[$k])) {
-            if ($v === $objSecondFile[$k]) {
-                $result[] = "    " . $k . ": " . $objSecondFile[$k];
-            } else {
-                $result[] = "  - " . $k . ": " . $v;
-                $result[] = "  + " . $k . ": " . $objSecondFile[$k];
-            }
-        } else {
-            $result[] =  "  - " . $k . ": " . $v;
-        }
-    }
-
-    foreach ($objSecondFile as $k => $v) {
-        $objFirstFileKeys = array_keys($objFirstFile);
-
-        if (!in_array($k, $objFirstFileKeys)) {
-            $result[] = "  + " . $k . ": " . $v;
-        }
-    }
-
-    $result[] = "}";
-
-    return implode(PHP_EOL, $result) . PHP_EOL;
+    return "";
 }
 
 function decodeJsonDiff(string $file): array
