@@ -34,12 +34,11 @@ function renderDiff(array $firstFile, array $secondFile): string
         if (array_key_exists($key, $firstFile) && array_key_exists($key, $secondFile)) {
             if ($firstFile[$key] === $secondFile[$key]) {
                 $acc[] = "    " . $key . ": " . $firstFile[$key];
-                return $acc;
             } else {
                 $acc[] = "  - " . $key . ": " . $firstFile[$key];
                 $acc[] = "  + " . $key . ": " . $secondFile[$key];
-                return $acc;
             }
+            return $acc;
         }
 
         if (!array_key_exists($key, $firstFile)) {
