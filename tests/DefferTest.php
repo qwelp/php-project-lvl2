@@ -21,9 +21,13 @@ class DefferTest extends TestCase
         $expected .= "  - timeout: 50" . PHP_EOL;
         $expected .= "  + timeout: 20" . PHP_EOL;
         $expected .= "  - proxy: 123.234.53.22" . PHP_EOL;
-        $expected .= "  - follow: " . PHP_EOL;
-        $expected .= "  + verbose: 1" . PHP_EOL;
+        $expected .= "  - follow: false" . PHP_EOL;
+        $expected .= "  + verbose: true" . PHP_EOL;
         $expected .= "}" . PHP_EOL;
+
+        echo "<pre>";
+        print_r($diff);
+        echo "</pre>";
 
         $this->assertEquals($expected, $diff);
     }

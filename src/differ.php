@@ -18,6 +18,9 @@ function genDiff(string $firstFile, string $secondFile): string
     $objFirstFile = decodeJsonFileDiff($firstFile);
     $objSecondFile = decodeJsonFileDiff($secondFile);
 
+    $objFirstFile = boolTostring($objFirstFile);
+    $objSecondFile = boolTostring($objSecondFile);
+
     return renderDiff($objFirstFile, $objSecondFile);
 }
 
@@ -45,6 +48,16 @@ function renderDiff(array $firstFile, array $secondFile): string
     }, []);
 
     return "{" . PHP_EOL . implode(PHP_EOL, $result) . PHP_EOL . "}" . PHP_EOL;
+}
+
+function boolTostring(array $array): array
+{
+    return array_map(function ($value) {
+        if (is_bool($value)) {
+            return $value ? 'true' : 'false';
+        }
+        return $value;
+    }, $array);
 }
 
 function decodeJsonFileDiff(string $file): array
