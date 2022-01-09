@@ -28,11 +28,13 @@ function renderDiff(array $firstFile, array $secondFile): string
     foreach ($firstFile as $k => $v) {
         if (isset($secondFile[$k]) && $v === $secondFile[$k]) {
             $result[] = "    " . $k . ": " . $secondFile[$k];
+            continue;
         }
 
         if (isset($secondFile[$k]) && $v !== $secondFile[$k]) {
             $result[] = "  - " . $k . ": " . $v;
             $result[] = "  + " . $k . ": " . $secondFile[$k];
+            continue;
         }
 
         if (!isset($secondFile[$k])) {
