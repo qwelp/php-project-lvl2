@@ -24,6 +24,7 @@ function genDiff(string $firstFile, string $secondFile): string
 function renderDiff(array $firstFile, array $secondFile): string
 {
     $result = [];
+    $objFirstFileKeys = array_keys($firstFile);
 
     foreach ($firstFile as $k => $v) {
         if (!isset($secondFile[$k])) {
@@ -41,8 +42,6 @@ function renderDiff(array $firstFile, array $secondFile): string
     }
 
     foreach ($secondFile as $k => $v) {
-        $objFirstFileKeys = array_keys($firstFile);
-
         if (!in_array($k, $objFirstFileKeys)) {
             $result[] = "  + " . $k . ": " . $v;
         }
