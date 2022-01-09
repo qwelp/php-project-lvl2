@@ -23,28 +23,33 @@ function genDiff(string $firstFile, string $secondFile): string
 
 function renderDiff(array $firstFile, array $secondFile): string
 {
-    $result = [];
+    $filesKeys = array_keys(array_merge($firstFile, $secondFile));
 
-    foreach ($firstFile as $k => $v) {
-        if (!isset($secondFile[$k])) {
-            $result[] = "  - " . $k . ": " . $v;
-            continue;
+    $result = array_reduce($filesKeys, function ($acc, $key) use ($firstFile, $secondFile) {
+
+        if (!array_key_exists($key, $firstFile) && !array_key_exists($key, $secondFile)) {
+            return $acc;
         }
 
-        if ($v === $secondFile[$k]) {
-            $result[] = "    " . $k . ": " . $secondFile[$k];
-            continue;
+        if (array_key_exists($key, $firstFile) && array_key_exists($key, $secondFile)) {
+            if ($firstFile[$key] === $secondFile[$key]) {
+                $acc[] = "    " . $key . ": " . $firstFile[$key];
+                return $acc;
+            } else {
+                $acc[] = "  - " . $key . ": " . $firstFile[$key];
+                $acc[] = "  + " . $key . ": " . $secondFile[$key];
+                return $acc;
+            }
         }
 
-        $result[] = "  - " . $k . ": " . $v;
-        $result[] = "  + " . $k . ": " . $secondFile[$k];
-    }
-
-    foreach ($secondFile as $k => $v) {
-        if (!array_key_exists($k, $firstFile)) {
-            $result[] = "  + " . $k . ": " . $v;
+        if (!array_key_exists($key, $firstFile)) {
+            $acc[] = "  + " . $key . ": " . $secondFile[$key];
+            return $acc;
+        } else {
+            $acc[] = "  - " . $key . ": " . $firstFile[$key];
+            return $acc;
         }
-    }
+    }, []);
 
     return "{" . PHP_EOL . implode(PHP_EOL, $result) . PHP_EOL . "}" . PHP_EOL;
 }
