@@ -26,14 +26,16 @@ function renderDiff(array $firstFile, array $secondFile): string
     $result = [];
 
     foreach ($firstFile as $k => $v) {
-        if (isset($secondFile[$k])) {
-            if ($v === $secondFile[$k]) {
-                $result[] = "    " . $k . ": " . $secondFile[$k];
-            } else {
-                $result[] = "  - " . $k . ": " . $v;
-                $result[] = "  + " . $k . ": " . $secondFile[$k];
-            }
-        } else {
+        if (isset($secondFile[$k]) && $v === $secondFile[$k]) {
+            $result[] = "    " . $k . ": " . $secondFile[$k];
+        }
+
+        if (isset($secondFile[$k]) && $v !== $secondFile[$k]) {
+            $result[] = "  - " . $k . ": " . $v;
+            $result[] = "  + " . $k . ": " . $secondFile[$k];
+        }
+
+        if (!isset($secondFile[$k])) {
             $result[] = "  - " . $k . ": " . $v;
         }
     }
