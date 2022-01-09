@@ -15,16 +15,16 @@ function genDiff(string $firstFile, string $secondFile): string
         throw new \Exception("File empty.");
     }
 
-    $objFirstFile = decodeJsonFileDiff($firstFile);
-    $objSecondFile = decodeJsonFileDiff($secondFile);
+    $objFirstFile = decodeJsonFile($firstFile);
+    $objSecondFile = decodeJsonFile($secondFile);
 
-    $objFirstFile = boolTostring($objFirstFile);
-    $objSecondFile = boolTostring($objSecondFile);
+    $objFirstFile = boolToString($objFirstFile);
+    $objSecondFile = boolToString($objSecondFile);
 
-    return renderDiff($objFirstFile, $objSecondFile);
+    return render($objFirstFile, $objSecondFile);
 }
 
-function renderDiff(array $firstFile, array $secondFile): string
+function render(array $firstFile, array $secondFile): string
 {
     $filesKeys = array_keys(array_merge($firstFile, $secondFile));
 
@@ -50,7 +50,7 @@ function renderDiff(array $firstFile, array $secondFile): string
     return "{" . PHP_EOL . implode(PHP_EOL, $result) . PHP_EOL . "}" . PHP_EOL;
 }
 
-function boolTostring(array $array): array
+function boolToString(array $array): array
 {
     return array_map(function ($value) {
         if (is_bool($value)) {
@@ -60,7 +60,7 @@ function boolTostring(array $array): array
     }, $array);
 }
 
-function decodeJsonFileDiff(string $file): array
+function decodeJsonFile(string $file): array
 {
     return json_decode($file, true);
 }

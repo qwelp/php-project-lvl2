@@ -25,10 +25,6 @@ class DefferTest extends TestCase
         $expected .= "  + verbose: true" . PHP_EOL;
         $expected .= "}" . PHP_EOL;
 
-        echo "<pre>";
-        print_r($diff);
-        echo "</pre>";
-
         $this->assertEquals($expected, $diff);
     }
 
