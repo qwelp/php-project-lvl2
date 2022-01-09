@@ -31,7 +31,7 @@ function renderDiff(array $firstFile, array $secondFile): string
             continue;
         }
 
-        if (isset($secondFile[$k]) && $v !== $secondFile[$k]) {
+        if (isset($secondFile[$k])) {
             $result[] = "  - " . $k . ": " . $v;
             $result[] = "  + " . $k . ": " . $secondFile[$k];
             continue;
