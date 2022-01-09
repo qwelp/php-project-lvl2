@@ -44,11 +44,10 @@ function renderDiff(array $firstFile, array $secondFile): string
 
         if (!array_key_exists($key, $firstFile)) {
             $acc[] = "  + " . $key . ": " . $secondFile[$key];
-            return $acc;
         } else {
             $acc[] = "  - " . $key . ": " . $firstFile[$key];
-            return $acc;
         }
+        return $acc;
     }, []);
 
     return "{" . PHP_EOL . implode(PHP_EOL, $result) . PHP_EOL . "}" . PHP_EOL;
