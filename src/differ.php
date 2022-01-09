@@ -26,11 +26,6 @@ function renderDiff(array $firstFile, array $secondFile): string
     $filesKeys = array_keys(array_merge($firstFile, $secondFile));
 
     $result = array_reduce($filesKeys, function ($acc, $key) use ($firstFile, $secondFile) {
-
-        if (!array_key_exists($key, $firstFile) && !array_key_exists($key, $secondFile)) {
-            return $acc;
-        }
-
         if (array_key_exists($key, $firstFile) && array_key_exists($key, $secondFile)) {
             if ($firstFile[$key] === $secondFile[$key]) {
                 $acc[] = "    " . $key . ": " . $firstFile[$key];
