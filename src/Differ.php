@@ -26,21 +26,18 @@ function render(array $firstFile, array $secondFile): string
 {
     $data = array_merge($firstFile, $secondFile);
     $result = array_reduce(array_keys($data), function ($acc, $key) use ($firstFile, $secondFile) {
-        $firstFileValue = stringToBool($firstFile[$key]);
-        $secondFileValue = stringToBool($secondFile[$key]);
-
         if (array_key_exists($key, $firstFile) && array_key_exists($key, $secondFile)) {
             if ($firstFile[$key] === $secondFile[$key]) {
-                $acc[$key] = "    {$key}: " . $firstFileValue;
+                $acc[$key] = "    {$key}: " . stringToBool($firstFile[$key]);
             } else {
-                $acc[$key] = "  - {$key}: " . $firstFileValue;
-                $acc[$key . 0] = "  + {$key}: " . $secondFileValue;
+                $acc[$key] = "  - {$key}: " . stringToBool($firstFile[$key]);
+                $acc[$key . 0] = "  + {$key}: " . stringToBool($secondFile[$key]);
             }
             return $acc;
         }
 
         if (array_key_exists($key, $firstFile)) {
-            $acc[$key] = "  - {$key}: " . $firstFileValue;
+            $acc[$key] = "  - {$key}: " . stringToBool($firstFile[$key]);
             return $acc;
         }
         $acc[$key] = "  + {$key}: " . stringToBool($secondFile[$key]);
