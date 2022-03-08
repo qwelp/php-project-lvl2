@@ -30,11 +30,10 @@ function render(array $objFile1, array $objFile2): string
         if (array_key_exists($key, $objFile1) && array_key_exists($key, $objFile2)) {
             if ($objFile1[$key] === $objFile2[$key]) {
                 $result[$key] = "    {$key}: " . stringToBool($objFile1[$key]);
-                continue;
+            } else {
+                $result[$key] = "  - {$key}: " . stringToBool($objFile1[$key]);
+                $result[$key . 0] = "  + {$key}: " . stringToBool($objFile2[$key]);
             }
-
-            $result[$key] = "  - {$key}: " . stringToBool($objFile1[$key]);
-            $result[$key . 0] = "  + {$key}: " . stringToBool($objFile2[$key]);
             continue;
         }
 
