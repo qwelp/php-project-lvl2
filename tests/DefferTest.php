@@ -8,8 +8,22 @@ use function Differ\Differ\genDiff;
 
 class DefferTest extends TestCase
 {
-    public function testDefferJson(): void
+    public function testExceptionFileNotFound(): void
     {
-        $this->assertEquals([1, 2], [1 , 2]);
+        $pathFixture = __DIR__ . "/fixtures/";
+        $file2 = $pathFixture . "file2.json";
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('File not found.');
+        genDiff('', $file2);
+    }
+
+    public function testExceptionFileEmpty(): void
+    {
+        $pathFixture = __DIR__ . "/fixtures/";
+        $file1 = $pathFixture . "file1.json";
+        $fileEmpty = $pathFixture . "fileEmpty.json";
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('File empty.');
+        genDiff($file1, $fileEmpty);
     }
 }
