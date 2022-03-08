@@ -26,22 +26,26 @@ function render(array $firstFile, array $secondFile): string
 {
     $result =  [];
     $data = array_merge($firstFile, $secondFile);
+
     foreach ($data as $key => $value) {
+        $firstFileValue = stringToBool($firstFile[$key]);
+        $secondFileValue = stringToBool($secondFile[$key]);
+
         if (array_key_exists($key, $firstFile) && array_key_exists($key, $secondFile)) {
             if ($firstFile[$key] === $secondFile[$key]) {
-                $result[$key] = "    {$key}: " . stringToBool($firstFile[$key]);
+                $result[$key] = "    {$key}: " . $firstFileValue;
             } else {
-                $result[$key] = "  - {$key}: " . stringToBool($firstFile[$key]);
-                $result[$key . 0] = "  + {$key}: " . stringToBool($secondFile[$key]);
+                $result[$key] = "  - {$key}: " . $firstFileValue;
+                $result[$key . 0] = "  + {$key}: " . $secondFileValue;
             }
             continue;
         }
 
         if (array_key_exists($key, $firstFile)) {
-            $result[$key] = "  - {$key}: " . stringToBool($firstFile[$key]);
+            $result[$key] = "  - {$key}: " . $firstFileValue;
             continue;
         }
-        $result[$key] = "  + {$key}: " . stringToBool($secondFile[$key]);
+        $result[$key] = "  + {$key}: " . $secondFileValue;
     }
     ksort($result);
     return "{" . PHP_EOL . implode(PHP_EOL, $result) . PHP_EOL . "}" . PHP_EOL;
