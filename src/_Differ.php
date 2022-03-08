@@ -2,21 +2,25 @@
 
 namespace Differ\Differ;
 
-function genDiff(string $firstFile, string $secondFile): string
+use function Differ\Parsers\parse;
+
+function genDiff(string $file1, string $file2): string
 {
-    if (!file_exists($firstFile) || !file_exists($secondFile)) {
+    if (!file_exists($file1) || !file_exists($file2)) {
         throw new \Exception("File not found.");
     }
 
-    $firstFile = file_get_contents($firstFile);
-    $secondFile = file_get_contents($secondFile);
+    $firstFile = file_get_contents($file1);
+    $secondFile = file_get_contents($file2);
 
     if (empty($firstFile) || empty($secondFile)) {
         throw new \Exception("File empty.");
     }
 
-    $objFirstFile = decodeJsonFile($firstFile);
-    $objSecondFile = decodeJsonFile($secondFile);
+    $formatFile = pathinfo($file1, PATHINFO_EXTENSION);
+
+    $objFirstFile = (array) parse($firstFile, $formatFile);
+    $objSecondFile = (array) parse($secondFile, $formatFile);
 
     $objFirstFile = boolToString($objFirstFile);
     $objSecondFile = boolToString($objSecondFile);
@@ -58,9 +62,4 @@ function boolToString(array $array): array
         }
         return $value;
     }, $array);
-}
-
-function decodeJsonFile(string $file): array
-{
-    return json_decode($file, true);
 }

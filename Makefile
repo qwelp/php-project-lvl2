@@ -1,6 +1,12 @@
 install:
 	composer install
 
+update:
+	composer update
+
+dump-autoload:
+	composer dump-autoload
+
 console:
 	composer exec --verbose psysh
 
@@ -10,9 +16,6 @@ lint:
 
 lint-fix:
 	composer exec --verbose phpcbf -- --standard=PSR12 src tests
-
-dump:
-	composer dump-autoload
 
 test:
 	composer exec --verbose phpunit tests
