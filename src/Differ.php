@@ -4,7 +4,7 @@ namespace Differ\Differ;
 
 function genDiff(string $pathToFile1, string $pathToFile2): string
 {
-    $result =  [];
+
 
     if (!file_exists($pathToFile1) || !file_exists($pathToFile2)) {
         throw new \Exception("File not found.");
@@ -19,34 +19,37 @@ function genDiff(string $pathToFile1, string $pathToFile2): string
 
     $objFile1 = json_decode($file1, true);
     $objFile2 = json_decode($file2, true);
+    return render($objFile1, $objFile2);
+}
 
+function render(array $objFile1, array $objFile2): string
+{
+    $result =  [];
     $data = array_merge($objFile1, $objFile2);
-
     foreach ($data as $key => $value) {
         if (array_key_exists($key, $objFile1) && array_key_exists($key, $objFile2)) {
             if ($objFile1[$key] === $objFile2[$key]) {
-                $value = getStringisBool($objFile1[$key]);
-                $result[$key] = "    {$key}: {$value}";
+                $result[$key] = "    {$key}: " . stringToBool($objFile1[$key]);
                 continue;
             }
 
-            $result[$key] = "  - {$key}: " . getStringisBool($objFile1[$key]);
-            $result[$key . 0] = "  + {$key}: " . getStringisBool($objFile2[$key]);
+            $result[$key] = "  - {$key}: " . stringToBool($objFile1[$key]);
+            $result[$key . 0] = "  + {$key}: " . stringToBool($objFile2[$key]);
             continue;
         }
 
         if (array_key_exists($key, $objFile1)) {
-            $result[$key] = "  - {$key}: " . getStringisBool($objFile1[$key]);
+            $result[$key] = "  - {$key}: " . stringToBool($objFile1[$key]);
             continue;
         }
-        $result[$key] = "  + {$key}: " . getStringisBool($objFile2[$key]);
+        $result[$key] = "  + {$key}: " . stringToBool($objFile2[$key]);
     }
 
     ksort($result);
     return "{" . PHP_EOL . implode(PHP_EOL, $result) . PHP_EOL . "}" . PHP_EOL;
 }
 
-function getStringisBool(mixed $value): mixed
+function stringToBool(mixed $value): mixed
 {
     if (is_bool($value)) {
         return $value ? "true" : "false";
