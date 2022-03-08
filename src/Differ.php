@@ -20,28 +20,26 @@ function genDiff(string $pathToFile1, string $pathToFile2): string
     $objFile1 = json_decode($file1, true);
     $objFile2 = json_decode($file2, true);
 
-    foreach ($objFile1 as $key => $value) {
-        $value = getStringisBool($value);
+    $data = array_merge($objFile1, $objFile2);
 
-        if (array_key_exists($key, $objFile2) && $value === $objFile2[$key]) {
-            $result[$key] = "    {$key}: {$value}";
+    foreach ($data as $key => $value) {
+        if (array_key_exists($key, $objFile1) && array_key_exists($key, $objFile2)) {
+            if ($objFile1[$key] === $objFile2[$key]) {
+                $value = getStringisBool($objFile1[$key]);
+                $result[$key] = "    {$key}: {$value}";
+                continue;
+            }
+
+            $result[$key] = "  - {$key}: " . getStringisBool($objFile1[$key]);
+            $result[$key . 0] = "  + {$key}: " . getStringisBool($objFile2[$key]);
+            continue;
         }
 
-        if (array_key_exists($key, $objFile2) && $value !== $objFile2[$key]) {
-            $result[$key] = "  - {$key}: {$value}";
-            $result[$key . 0] = "  + {$key}: {$objFile2[$key]}";
+        if (array_key_exists($key, $objFile1)) {
+            $result[$key] = "  - {$key}: " . getStringisBool($objFile1[$key]);
+            continue;
         }
-
-        if (!array_key_exists($key, $objFile2)) {
-            $result[$key] = "  - {$key}: {$value}";
-        }
-    }
-
-    foreach ($objFile2 as $key => $value) {
-        if (!array_key_exists($key, $objFile1)) {
-            $value = getStringisBool($value);
-            $result[$key] = "  + {$key}: {$value}";
-        }
+        $result[$key] = "  + {$key}: " . getStringisBool($objFile2[$key]);
     }
 
     ksort($result);
