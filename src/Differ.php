@@ -24,29 +24,29 @@ function genDiff(string $pathToFile1, string $pathToFile2): string
 
 function render(array $firstFile, array $secondFile): string
 {
-    $result =  [];
     $data = array_merge($firstFile, $secondFile);
-
-    foreach ($data as $key => $value) {
+    $result = array_reduce(array_keys($data), function ($acc, $key) use ($firstFile, $secondFile) {
         $firstFileValue = stringToBool($firstFile[$key]);
         $secondFileValue = stringToBool($secondFile[$key]);
 
         if (array_key_exists($key, $firstFile) && array_key_exists($key, $secondFile)) {
             if ($firstFile[$key] === $secondFile[$key]) {
-                $result[$key] = "    {$key}: " . $firstFileValue;
+                $acc[$key] = "    {$key}: " . $firstFileValue;
             } else {
-                $result[$key] = "  - {$key}: " . $firstFileValue;
-                $result[$key . 0] = "  + {$key}: " . $secondFileValue;
+                $acc[$key] = "  - {$key}: " . $firstFileValue;
+                $acc[$key . 0] = "  + {$key}: " . $secondFileValue;
             }
-            continue;
+            return $acc;
         }
 
         if (array_key_exists($key, $firstFile)) {
-            $result[$key] = "  - {$key}: " . $firstFileValue;
-            continue;
+            $acc[$key] = "  - {$key}: " . $firstFileValue;
+            return $acc;
         }
-        $result[$key] = "  + {$key}: " . $secondFileValue;
-    }
+        $acc[$key] = "  + {$key}: " . stringToBool($secondFile[$key]);
+        return $acc;
+    }, []);
+
     ksort($result);
     return "{" . PHP_EOL . implode(PHP_EOL, $result) . PHP_EOL . "}" . PHP_EOL;
 }
