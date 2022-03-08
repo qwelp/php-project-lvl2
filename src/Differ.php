@@ -2,24 +2,11 @@
 
 namespace Differ\Differ;
 
+use function Differ\Parsers\parser;
+
 function genDiff(string $pathToFile1, string $pathToFile2): string
 {
-
-
-    if (!file_exists($pathToFile1) || !file_exists($pathToFile2)) {
-        throw new \Exception("File not found.");
-    }
-
-    $file1 = file_get_contents($pathToFile1);
-    $file2 = file_get_contents($pathToFile2);
-
-    if (empty($file1) || empty($file2)) {
-        throw new \Exception("File empty.");
-    }
-
-    $firstFile = json_decode($file1, true);
-    $secondFile = json_decode($file2, true);
-    return render($firstFile, $secondFile);
+    return render(parser($pathToFile1), parser($pathToFile2));
 }
 
 function render(array $firstFile, array $secondFile): string
