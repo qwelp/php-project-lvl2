@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f6ac3f911b0286ee57e29df3def2270a",
+    "content-hash": "a68582ee099f74794d39d773c1c47971",
     "packages": [
         {
             "name": "docopt/docopt",
@@ -55,6 +55,54 @@
                 "source": "https://github.com/docopt/docopt.php/tree/1.0.4"
             },
             "time": "2019-12-03T02:48:46+00:00"
+        },
+        {
+            "name": "hexlet/trees",
+            "version": "v1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hexlet-components/php-immutable-fs-trees.git",
+                "reference": "8f9e560980b98eb30c7dd2ca5d092f63107802bf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hexlet-components/php-immutable-fs-trees/zipball/8f9e560980b98eb30c7dd2ca5d092f63107802bf",
+                "reference": "8f9e560980b98eb30c7dd2ca5d092f63107802bf",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4 || >=8.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.5",
+                "squizlabs/php_codesniffer": "^3.6"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/trees.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Sergey Karpuk",
+                    "email": "sergey.k@hexlet.io"
+                }
+            ],
+            "description": "Trees implementation",
+            "keywords": [
+                "hexlet",
+                "trees"
+            ],
+            "support": {
+                "issues": "https://github.com/hexlet-components/php-immutable-fs-trees/issues",
+                "source": "https://github.com/hexlet-components/php-immutable-fs-trees/tree/v1.1.0"
+            },
+            "time": "2022-01-16T12:54:36+00:00"
         },
         {
             "name": "lstrojny/functional-php",
