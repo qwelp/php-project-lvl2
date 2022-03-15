@@ -100,18 +100,12 @@ function iter(string $keyNode, array $firstData, array $secondData): mixed
                         $acc["- {$key}"] = $firstData[$key];
                         $acc["+ {$key}"] = convertToStringValue($secondData[$key]);
                     }
-
                     return $acc;
-
                 }
 
                 if (is_array($secondData[$key])) {
                     $isFirst = $fullFirstData[$keyNode] ?? false;
                     $isSecond = $fullSecondData[$keyNode] ?? false;
-
-                    if ($key == "setting6") {
-
-                    }
 
                     if (array_key_exists($key, $isFirst) && array_key_exists($key, $isSecond)) {
                         if (is_array($secondData[$key]) && is_array($firstData[$key])) {
@@ -162,7 +156,7 @@ function iter(string $keyNode, array $firstData, array $secondData): mixed
 
 function stylish(array $data): string
 {
-    $iter = function (string|array $children, array $data, &$iter, int $marker = 4): string {
+    $iter = function (mixed $children, array $data, &$iter, int $marker = 4): string {
         $newMarker = str_repeat(" ", $marker + 2);
         $result = "";
 
@@ -197,10 +191,9 @@ function convertToStringValue(mixed $value): mixed
         return "null";
     }
 
-    if(is_array($value)) {
+    if (is_array($value)) {
         $key = key($value);
         return ["  {$key}" => $value[$key]];
     }
-
     return $value;
 }
