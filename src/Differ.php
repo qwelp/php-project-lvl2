@@ -26,9 +26,9 @@ function genDiff(string $pathToFile1, string $pathToFile2): string
         return $acc;
     }, []);
 
-    $result = json_encode($result, JSON_PRETTY_PRINT);
-    $result = str_replace(['"', ','], '', (string) $result);
-    return $result;
+    //$result = json_encode($result, JSON_PRETTY_PRINT);
+    //$result = str_replace(['"', ','], '', (string) $result);
+    return stylish($result);
 }
 
 function iter(string $keyNode, array $firstData, array $secondData): mixed
@@ -71,19 +71,67 @@ function iter(string $keyNode, array $firstData, array $secondData): mixed
                     return $acc;
                 }
 
-                if (!is_array($firstData[$key])) {
-                    $acc["- {$key}"] = iter($key, $firstData, $secondData);
-                    $acc["+ {$key}"] = convertToStringValue($secondData[$key]);
+                // TODO tut
+                if (!is_array($firstData[$key]) && !is_array($secondData[$key])) {
+                    if ($firstData[$key] === $secondData[$key]) {
+                        $acc["  {$key}"] = convertToStringValue($firstData[$key]);
+                    } else {
+                        $acc["- {$key}"] = $firstData[$key];
+                        $acc["+ {$key}"] = convertToStringValue($secondData[$key]);
+                    }
                     return $acc;
                 }
 
-                if (!is_array($secondData[$key])) {
-                    $acc["- {$key}"] = convertToStringValue($firstData[$key]);
-                    $acc["+ {$key}"] = iter($key, $firstData, $secondData);
+                if (is_array($firstData[$key])) {
+                    $isFirst = $fullFirstData[$keyNode] ?? false;
+                    $isSecond = $fullSecondData[$keyNode] ?? false;
+                    if (array_key_exists($key, $isFirst) && array_key_exists($key, $isSecond)) {
+                        if (is_array($firstData[$key]) && is_array($secondData[$key])) {
+                            $acc["  {$key}"] = iter($key, $firstData, $secondData);
+                        } else {
+                            if ($isFirst === $isSecond) {
+                                $acc["  {$key}"] = iter($key, $firstData, $secondData);
+                            } else {
+                                $acc["- {$key}"] = convertToStringValue($firstData[$key]);
+                                $acc["+ {$key}"] = convertToStringValue($secondData[$key]);
+                            }
+                        }
+                    } else {
+                        $acc["- {$key}"] = $firstData[$key];
+                        $acc["+ {$key}"] = convertToStringValue($secondData[$key]);
+                    }
+
+                    return $acc;
+
+                }
+
+                if (is_array($secondData[$key])) {
+                    $isFirst = $fullFirstData[$keyNode] ?? false;
+                    $isSecond = $fullSecondData[$keyNode] ?? false;
+
+                    if ($key == "setting6") {
+
+                    }
+
+                    if (array_key_exists($key, $isFirst) && array_key_exists($key, $isSecond)) {
+                        if (is_array($secondData[$key]) && is_array($firstData[$key])) {
+                            $acc["  {$key}"] = iter($key, $firstData, $firstData);
+                        } else {
+                            if ($isFirst === $isSecond) {
+                                $acc["  {$key}"] = iter($key, $firstData, $firstData);
+                            } else {
+                                $acc["- {$key}"] = iter($key, $firstData, $firstData);
+                                $acc["+ {$key}"] = convertToStringValue($firstData[$key]);
+                            }
+                        }
+                    } else {
+                        $acc["+ {$key}"] = convertToStringValue($firstData[$key]);
+                        $acc["- {$key}"] = $secondData[$key];
+                    }
+
                     return $acc;
                 }
 
-                $acc[" {$key}"] = iter($key, $firstData, $secondData);
                 return $acc;
             }
 
@@ -91,7 +139,7 @@ function iter(string $keyNode, array $firstData, array $secondData): mixed
                 if (array_key_exists($keyNode, $fullSecondData)) {
                     $acc["- {$key}"] = iter($key, $firstData, $secondData);
                 } else {
-                    $acc[" {$key}"] = iter($key, $firstData, $secondData);
+                    $acc["  {$key}"] = iter($key, $firstData, $secondData);
                 }
                 return $acc;
             }
@@ -100,7 +148,7 @@ function iter(string $keyNode, array $firstData, array $secondData): mixed
                 if (array_key_exists($keyNode, $fullFirstData)) {
                     $acc["+ {$key}"] = convertToStringValue($secondData[$key]);
                 } else {
-                    $acc[" {$key}"] = iter($key, $firstData, $secondData);
+                    $acc["  {$key}"] = iter($key, $firstData, $secondData);
                 }
                 return $acc;
             }
@@ -114,20 +162,17 @@ function iter(string $keyNode, array $firstData, array $secondData): mixed
 
 function stylish(array $data): string
 {
-    $iter = function (string|array $children, array $data, &$iter, int $marker = 2): string {
-        if (!is_array($children)) {
-            return PHP_EOL . str_repeat(" ", $marker) . "{$children}";
-        }
-
-        $newMarker = str_repeat(" ", $marker + 4);
+    $iter = function (string|array $children, array $data, &$iter, int $marker = 4): string {
+        $newMarker = str_repeat(" ", $marker + 2);
         $result = "";
 
         foreach ($children as $key => $child) {
             if (is_array($child)) {
                 $child = $iter($child, $data, $iter, $marker + 4);
-                $result .= PHP_EOL . $newMarker . "{$key} : {" . $child . PHP_EOL . str_repeat(" ", $marker + 6) . "}";
+                $result .= PHP_EOL . $newMarker .
+                    "{$key}: {" . $child . PHP_EOL . str_repeat(" ", $marker + 2) . "  }";
             } else {
-                $result .= PHP_EOL . $newMarker . "{$key} : " . "  {$child}";
+                $result .= PHP_EOL . str_repeat(" ", $marker + 2) . "{$key}: " . "{$child}";
             }
         }
         return $result;
@@ -135,7 +180,7 @@ function stylish(array $data): string
 
     $result = array_reduce(array_keys($data), function ($acc, $key) use ($data, $iter) {
         $child = $iter($data[$key], $data, $iter);
-        $acc .= "    {$key} : {" . $child . PHP_EOL . "    }" . PHP_EOL;
+        $acc .= str_repeat(" ", 2) . "{$key}: {" . $child . PHP_EOL . "    }" . PHP_EOL;
         return $acc;
     }, "");
 
@@ -147,8 +192,15 @@ function convertToStringValue(mixed $value): mixed
     if (is_bool($value)) {
         return $value ? "true" : "false";
     }
+
     if (is_null($value)) {
         return "null";
     }
+
+    if(is_array($value)) {
+        $key = key($value);
+        return ["  {$key}" => $value[$key]];
+    }
+
     return $value;
 }
