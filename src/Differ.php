@@ -4,196 +4,172 @@ namespace Differ\Differ;
 
 use function Differ\Parsers\parser;
 
-function genDiff(string $pathToFile1, string $pathToFile2): string
+function genDiff(string $pathToFile1, string $pathToFile2, string $format = ""): string
 {
     $firstData = parser($pathToFile1);
     $secondData = parser($pathToFile2);
-    $data = array_merge_recursive($firstData, $secondData);
+    $data = createData($firstData, $secondData);
 
-    $result = array_reduce(array_keys($data), function ($acc, $key) use ($firstData, $secondData) {
-
-        if (array_key_exists($key, $firstData) && array_key_exists($key, $secondData)) {
-            $acc["  {$key}"] = iter($key, $firstData, $secondData);
-            return $acc;
-        }
-
-        if (array_key_exists($key, $firstData)) {
-            $acc["- {$key}"] = iter($key, $firstData, $secondData);
-            return $acc;
-        }
-
-        $acc["+ {$key}"] = iter($key, $firstData, $secondData);
-        return $acc;
-    }, []);
-
-    //$result = json_encode($result, JSON_PRETTY_PRINT);
-    //$result = str_replace(['"', ','], '', (string) $result);
-    return stylish($result);
-}
-
-function iter(string $keyNode, array $firstData, array $secondData): mixed
-{
-    $fullFirstData = $firstData;
-    $fullSecondData = $secondData;
-    $firstData = $firstData[$keyNode] ?? false;
-    $secondData = $secondData[$keyNode] ?? false;
-
-    if (!$firstData) {
-        $firstData = [];
-    }
-
-    if (!$secondData) {
-        $secondData = [];
-    }
-
-    if (!is_array($firstData)) {
-        return convertToStringValue($firstData);
-    }
-
-    if (!is_array($secondData)) {
-        return convertToStringValue($secondData);
-    }
-
-    $data = array_merge_recursive($firstData, $secondData);
-    ksort($data);
-
-    $result = array_reduce(
-        array_keys($data),
-        function ($acc, $key) use ($firstData, $secondData, $keyNode, $fullFirstData, $fullSecondData) {
-            if (array_key_exists($key, $firstData) && array_key_exists($key, $secondData)) {
-                if (!is_array($firstData[$key]) && !is_array($secondData[$key])) {
-                    if ($firstData[$key] !== $secondData[$key]) {
-                        $acc["- {$key}"] = convertToStringValue($firstData[$key]);
-                        $acc["+ {$key}"] = convertToStringValue($secondData[$key]);
-                    } else {
-                        $acc["  {$key}"] = convertToStringValue($firstData[$key]);
-                    }
-                    return $acc;
-                }
-
-                // TODO tut
-                if (!is_array($firstData[$key]) && !is_array($secondData[$key])) {
-                    if ($firstData[$key] === $secondData[$key]) {
-                        $acc["  {$key}"] = convertToStringValue($firstData[$key]);
-                    } else {
-                        $acc["- {$key}"] = $firstData[$key];
-                        $acc["+ {$key}"] = convertToStringValue($secondData[$key]);
-                    }
-                    return $acc;
-                }
-
-                if (is_array($firstData[$key])) {
-                    $isFirst = $fullFirstData[$keyNode] ?? false;
-                    $isSecond = $fullSecondData[$keyNode] ?? false;
-                    if (array_key_exists($key, $isFirst) && array_key_exists($key, $isSecond)) {
-                        if (is_array($firstData[$key]) && is_array($secondData[$key])) {
-                            $acc["  {$key}"] = iter($key, $firstData, $secondData);
-                        } else {
-                            if ($isFirst === $isSecond) {
-                                $acc["  {$key}"] = iter($key, $firstData, $secondData);
-                            } else {
-                                $acc["- {$key}"] = convertToStringValue($firstData[$key]);
-                                $acc["+ {$key}"] = convertToStringValue($secondData[$key]);
-                            }
-                        }
-                    } else {
-                        $acc["- {$key}"] = $firstData[$key];
-                        $acc["+ {$key}"] = convertToStringValue($secondData[$key]);
-                    }
-                    return $acc;
-                }
-
-                if (is_array($secondData[$key])) {
-                    $isFirst = $fullFirstData[$keyNode] ?? false;
-                    $isSecond = $fullSecondData[$keyNode] ?? false;
-
-                    if (array_key_exists($key, $isFirst) && array_key_exists($key, $isSecond)) {
-                        if (is_array($secondData[$key]) && is_array($firstData[$key])) {
-                            $acc["  {$key}"] = iter($key, $firstData, $firstData);
-                        } else {
-                            if ($isFirst === $isSecond) {
-                                $acc["  {$key}"] = iter($key, $firstData, $firstData);
-                            } else {
-                                $acc["- {$key}"] = iter($key, $firstData, $firstData);
-                                $acc["+ {$key}"] = convertToStringValue($firstData[$key]);
-                            }
-                        }
-                    } else {
-                        $acc["+ {$key}"] = convertToStringValue($firstData[$key]);
-                        $acc["- {$key}"] = $secondData[$key];
-                    }
-
-                    return $acc;
-                }
-
-                return $acc;
-            }
-
-            if (array_key_exists($key, $firstData)) {
-                if (array_key_exists($keyNode, $fullSecondData)) {
-                    $acc["- {$key}"] = iter($key, $firstData, $secondData);
-                } else {
-                    $acc["  {$key}"] = iter($key, $firstData, $secondData);
-                }
-                return $acc;
-            }
-
-            if (array_key_exists($key, $secondData)) {
-                if (array_key_exists($keyNode, $fullFirstData)) {
-                    $acc["+ {$key}"] = convertToStringValue($secondData[$key]);
-                } else {
-                    $acc["  {$key}"] = iter($key, $firstData, $secondData);
-                }
-                return $acc;
-            }
-            $acc["+ {$key}"] = iter($key, $firstData, $secondData);
-            return $acc;
-        },
-        []
-    );
-    return $result;
+    return stylish($data);
 }
 
 function stylish(array $data): string
 {
-    $iter = function (mixed $children, array $data, &$iter, int $marker = 4): string {
-        $newMarker = str_repeat(" ", $marker + 2);
-        $result = "";
+    $iter = function ($data, &$iter, $tabCount) {
 
-        foreach ($children as $key => $child) {
-            if (is_array($child)) {
-                $child = $iter($child, $data, $iter, $marker + 4);
-                $result .= PHP_EOL . $newMarker .
-                    "{$key}: {" . $child . PHP_EOL . str_repeat(" ", $marker + 2) . "  }";
+        $result = "";
+        $strTab = str_repeat(" ", $tabCount + 2);
+        $strTab2 = str_repeat(" ", $tabCount + 4);
+
+        foreach ($data as $node) {
+            $name = $node['name'];
+            $type = $node['type'];
+            $children = $node['children'];
+
+            if (is_array($children)) {
+                $result .= PHP_EOL . $strTab . "{$type} {$name}: {"
+                        . $iter($children, $iter, $tabCount + 4) . PHP_EOL . $strTab2 . "}";
             } else {
-                $result .= PHP_EOL . str_repeat(" ", $marker + 2) . "{$key}: " . "{$child}";
+                $result .= PHP_EOL . $strTab . "{$type} {$name}: " . $children;
             }
         }
         return $result;
     };
 
-    $result = array_reduce(array_keys($data), function ($acc, $key) use ($data, $iter) {
-        $child = $iter($data[$key], $data, $iter);
-        $acc .= str_repeat(" ", 2) . "{$key}: {" . $child . PHP_EOL . "    }" . PHP_EOL;
-        return $acc;
-    }, "");
-
-    return "{" . PHP_EOL . $result . "}";
+    $result = "";
+    $result .= "{" . PHP_EOL;
+    foreach ($data as $node) {
+        $result .= "  {$node["type"]} {$node["name"]}: {" . $iter($node["children"], $iter, 4) . PHP_EOL . "    }";
+        $result .= PHP_EOL;
+    }
+    $result .= "}";
+    return $result;
 }
 
-function convertToStringValue(mixed $value): mixed
+function createData(object $data1, object $data2): array
+{
+    $iter = function ($keyNode, $data1, $data2, $iterObject, &$iter) {
+
+        $keys = createKeys($data1, $data2);
+
+        return array_reduce($keys, function ($acc, $key) use ($data1, $data2, $keyNode, $iterObject, $iter) {
+
+            $firstData = $data1->$key ?? null;
+            $secondData = $data2->$key ?? null;
+
+            if (is_object($firstData) && is_object($secondData)) {
+                $acc[] = ["name" => $key, "type" => " ",
+                    "children" => $iter($keyNode, $firstData, $secondData, $iterObject, $iter)];
+                return $acc;
+            }
+
+            if ($firstData && is_object($firstData)) {
+                $dataValue1 = $iterObject($firstData, $iterObject);
+            } else {
+                $dataValue1 = stringToBool($firstData);
+            }
+
+            if ($secondData && is_object($secondData)) {
+                $dataValue2 = $iterObject($secondData, $iterObject);
+            } else {
+                $dataValue2 = stringToBool($secondData);
+            }
+
+            if (property_exists($data1, $key) && property_exists($data2, $key)) {
+                if ($data1->$key === $data2->$key) {
+                    $acc[] = ["name" => $key, "type" => " ", "children" => $dataValue1];
+                    return $acc;
+                }
+
+                $acc[] = ["name" => $key, "type" => "-", "children" => $dataValue1];
+                $acc[] = ["name" => $key, "type" => "+", "children" => $dataValue2];
+                return $acc;
+            }
+
+            if (property_exists($data1, $key)) {
+                $acc[] = ["name" => $key, "type" => "-", "children" => $dataValue1];
+                return $acc;
+            }
+
+            $acc[] = ["name" => $key, "type" => "+", "children" => $dataValue2];
+            return $acc;
+        }, []);
+    };
+
+    $iterObject = function ($secondData, &$iterObject) {
+
+        if (!is_object($secondData)) {
+            return [
+                "name" => key($secondData),
+                "type" => " ",
+                "value" => $secondData
+            ];
+        }
+
+        $result = [];
+        foreach ((array) $secondData as $key => $value) {
+            if (is_object($secondData->$key)) {
+                $result[] = [
+                    "name" => $key,
+                    "type" => " ",
+                    "children" => $iterObject($secondData->$key, $iterObject)
+                ];
+            } else {
+                $result[] = [
+                    "name" => $key,
+                    "type" => " ",
+                    "children" => $value
+                ];
+            }
+        }
+        return $result;
+    };
+
+    return array_reduce(createKeys($data1, $data2), function ($acc, $key) use ($data1, $data2, $iter, $iterObject) {
+        $firstData = $data1->$key ?? null;
+        $secondData = $data2->$key ?? null;
+
+        if (!is_null($firstData)  && !is_null($secondData)) {
+            if (gettype($firstData) === "object" && gettype($secondData) === "object") {
+                $acc[] = ["name" => $key, "type" => " ",
+                    "children" => $iter($key, $data1->$key, $data2->$key, $iterObject, $iter)];
+            }
+            return $acc;
+        }
+
+        if (is_null($firstData)) {
+            if (is_object($secondData)) {
+                $secondData = $iterObject($secondData, $iterObject);
+            }
+            $acc[] = ["name" => $key, "type" => "+", "children" => $secondData];
+            return $acc;
+        }
+
+        if (is_object($firstData)) {
+            $firstData = $iterObject($firstData, $iterObject);
+        }
+        $acc[] = ["name" => $key, "type" => "-", "children" => $firstData];
+        return $acc;
+    }, []);
+}
+
+function createKeys(object $data1, object $data2): array
+{
+    $firstKeys = array_keys((array)$data1);
+    $secondKeys = array_keys((array)$data2);
+    $keys  = array_unique(array_merge($firstKeys, $secondKeys));
+    sort($keys);
+    return $keys;
+}
+
+function stringToBool(mixed $value): mixed
 {
     if (is_bool($value)) {
         return $value ? "true" : "false";
     }
-
     if (is_null($value)) {
         return "null";
     }
 
-    if (is_array($value)) {
-        $key = key($value);
-        return ["  {$key}" => $value[$key]];
-    }
     return $value;
 }
