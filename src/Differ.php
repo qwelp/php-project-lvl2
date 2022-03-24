@@ -26,12 +26,10 @@ function json(array $data): mixed
             $name = $node['name'];
             $type = $node['type'];
             $children = $node['children'];
-
             if (is_array($children)) {
                 $acc["{$node['type']} {$name}"] = $iter($children, $iter);
                 return $acc;
             }
-
             $acc["{$type} {$name}"] = $children;
             return $acc;
         }, []);
