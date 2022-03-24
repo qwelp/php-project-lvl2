@@ -10,7 +10,73 @@ function genDiff(string $pathToFile1, string $pathToFile2, string $format = ""):
     $secondData = parser($pathToFile2);
     $data = createData($firstData, $secondData);
 
+    if ($format === "plain") {
+        return plain($data);
+    }
     return stylish($data);
+}
+
+function plain(array $data): string
+{
+    $iter = function (array $data, array $path, &$iter) {
+        $result = "";
+        $keyUpdate = [];
+        foreach ($data as $node) {
+            $name = $node['name'];
+            $type = $node['type'];
+            $children = $node['children'];
+
+            $pathMain = [...$path, ...[$name]];
+
+            if (count($path)) {
+                $newPath = implode(".", $path) . "." . $name;
+            } else {
+                $newPath = $name;
+            }
+
+            $update = array_filter($data, function ($item) use ($name) {
+                return $item["name"] === $name;
+            });
+            $update = array_values($update);
+
+            if (count($update) === 2) {
+                if (!in_array($newPath, $keyUpdate)) {
+                    $value1 = $update[0]['children'];
+                    $value2 = $update[1]['children'];
+
+                    $value1 = is_string($value1) ? "'{$value1}'" : stringToBool($value1);
+                    $value2 = is_string($value2) ? "'{$value2}'" : stringToBool($value2);
+
+                    $value1 = is_array($value1) ? '[complex value]' : $value1;
+                    $value2 = is_array($value2) ? '[complex value]' : $value2;
+
+                    $result .= "Property '{$newPath}' was updated. From {$value1} to {$value2}" . PHP_EOL;
+                }
+                $keyUpdate[] = $newPath;
+            } elseif (is_array($children)) {
+                if (isset($children[0]['object'])) {
+                    if ($type == "+") {
+                        $result .= "Property '{$newPath}' was added with value: [complex value]" . PHP_EOL;
+                    } elseif ($type == "-") {
+                        $result .= "Property '{$newPath}' was removed" . PHP_EOL;
+                    }
+                } else {
+                    $result .= $iter($children, $pathMain, $iter);
+                }
+            } else {
+                $value = is_string($node['children']) ? "'{$node['children']}'" : stringToBool($node['children']);
+
+                if ($type == "-") {
+                    $result .= "Property '{$newPath}' was removed" . PHP_EOL;
+                } elseif ($type == "+") {
+                    $result .= "Property '{$newPath}' was added with value: {$value}" . PHP_EOL;
+                }
+            }
+        }
+        return $result;
+    };
+
+    return trim($iter($data, [], $iter), PHP_EOL);
 }
 
 function stylish(array $data): string
@@ -30,7 +96,7 @@ function stylish(array $data): string
                 $result .= PHP_EOL . $strTab . "{$type} {$name}: {"
                         . $iter($children, $iter, $tabCount + 4) . PHP_EOL . $strTab2 . "}";
             } else {
-                $result .= PHP_EOL . $strTab . "{$type} {$name}: " . $children;
+                $result .= PHP_EOL . $strTab . "{$type} {$name}: " . stringToBool($children);
             }
         }
         return $result;
@@ -66,13 +132,13 @@ function createData(object $data1, object $data2): array
             if ($firstData && is_object($firstData)) {
                 $dataValue1 = $iterObject($firstData, $iterObject);
             } else {
-                $dataValue1 = stringToBool($firstData);
+                $dataValue1 = $firstData;
             }
 
             if ($secondData && is_object($secondData)) {
                 $dataValue2 = $iterObject($secondData, $iterObject);
             } else {
-                $dataValue2 = stringToBool($secondData);
+                $dataValue2 = $secondData;
             }
 
             if (property_exists($data1, $key) && property_exists($data2, $key)) {
@@ -102,6 +168,7 @@ function createData(object $data1, object $data2): array
             return [
                 "name" => key($secondData),
                 "type" => " ",
+                "object" => "Y",
                 "value" => $secondData
             ];
         }
@@ -112,12 +179,14 @@ function createData(object $data1, object $data2): array
                 $result[] = [
                     "name" => $key,
                     "type" => " ",
+                    "object" => "Y",
                     "children" => $iterObject($secondData->$key, $iterObject)
                 ];
             } else {
                 $result[] = [
                     "name" => $key,
                     "type" => " ",
+                    "object" => "Y",
                     "children" => $value
                 ];
             }
