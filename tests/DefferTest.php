@@ -11,12 +11,30 @@ class DefferTest extends TestCase
     public function testDeffer(): void
     {
         $pathFixture = __DIR__ . "/fixtures/";
-        $file1 = $pathFixture . "file1.json";
-        $file2 = $pathFixture . "file2.json";
+        $file_json_2_1 = $pathFixture . "file_json_2_1.json";
+        $file_json_2_2 = $pathFixture . "file_json_2_2.json";
+        $file_yml_1_1 = $pathFixture . "file_yml_1_1.yml";
+        $file_yml_1_2 = $pathFixture . "file_yml_1_2.yml";
+        $file_yml_2_1 = $pathFixture . "file_yml_2_1.yml";
+        $file_yml_2_2 = $pathFixture . "file_yml_2_2.yml";
+        $file_json_1_1 = $pathFixture . "file_json_1_1.json";
+        $file_json_1_2 = $pathFixture . "file_json_1_2.json";
 
-        $diff = genDiff($file1, $file2);
-        $diffFormate = genDiff($file1, $file2, "plain");
-        $diffFormateJson = genDiff($file1, $file2, "json");
+        $diff_yml_1 = genDiff($file_yml_1_1, $file_yml_1_2);
+        $diff_yml_2 = genDiff($file_yml_2_1, $file_yml_2_2);
+        $diff_1 = genDiff($file_json_1_1, $file_json_1_2);
+        $diff = genDiff($file_json_2_1, $file_json_2_2);
+        $diffFormate = genDiff($file_json_2_1, $file_json_2_2, "plain");
+        $diffFormateJson = genDiff($file_json_2_1, $file_json_2_2, "json");
+
+        $expected_1 = '{
+  - follow: false
+    host: hexlet.io
+  - proxy: 123.234.53.22
+  - timeout: 50
+  + timeout: 20
+  + verbose: true
+}';
 
         $expectedFormateJson = '{
     "  common": {
@@ -117,7 +135,10 @@ Property 'group3' was added with value: [complex value]";
         fee: 100500
     }
 }";
+        $this->assertEquals($expected_1, $diff_yml_1);
+        $this->assertEquals($expected_1, $diff_1);
         $this->assertEquals($expected, $diff);
+        $this->assertEquals($expected, $diff_yml_2);
         $this->assertEquals($expectedFormate, $diffFormate);
         $this->assertEquals($expectedFormateJson, $diffFormateJson);
     }

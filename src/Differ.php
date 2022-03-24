@@ -108,12 +108,11 @@ function plain(array $data): string
 function stylish(array $data): string
 {
     $iter = function ($data, &$iter, $tabCount) {
-
         $result = "";
         $strTab = str_repeat(" ", $tabCount + 2);
         $strTab2 = str_repeat(" ", $tabCount + 4);
 
-        foreach ($data as $node) {
+        foreach ((array) $data as $node) {
             $name = $node['name'];
             $type = $node['type'];
             $children = $node['children'];
@@ -131,7 +130,12 @@ function stylish(array $data): string
     $result = "";
     $result .= "{" . PHP_EOL;
     foreach ($data as $node) {
-        $result .= "  {$node["type"]} {$node["name"]}: {" . $iter($node["children"], $iter, 4) . PHP_EOL . "    }";
+        $children = $node["children"];
+        if (is_array($children)) {
+            $result .= "  {$node["type"]} {$node["name"]}: {" . $iter($children, $iter, 4) . PHP_EOL . "    }";
+        } else {
+            $result .= "  {$node["type"]} {$node["name"]}: " . $children;
+        }
         $result .= PHP_EOL;
     }
     $result .= "}";
@@ -224,6 +228,24 @@ function createData(object $data1, object $data2): array
         $firstData = $data1->$key ?? null;
         $secondData = $data2->$key ?? null;
 
+        if (!is_object($firstData) && !is_object($secondData)) {
+            if ($firstData === $secondData) {
+                $acc[] = ["name" => $key, "type" => " ", "children" => stringToBool($firstData)];
+                return $acc;
+            }
+            if (isset($firstData) && isset($secondData)) {
+                $acc[] = ["name" => $key, "type" => "-", "children" => stringToBool($firstData)];
+                $acc[] = ["name" => $key, "type" => "+", "children" => stringToBool($secondData)];
+                return $acc;
+            }
+            if (isset($firstData)) {
+                $acc[] = ["name" => $key, "type" => "-", "children" => stringToBool($firstData)];
+                return $acc;
+            }
+            $acc[] = ["name" => $key, "type" => "+", "children" => stringToBool($secondData)];
+            return $acc;
+        }
+
         if (!is_null($firstData)  && !is_null($secondData)) {
             if (gettype($firstData) === "object" && gettype($secondData) === "object") {
                 $acc[] = ["name" => $key, "type" => " ",
@@ -243,6 +265,7 @@ function createData(object $data1, object $data2): array
         if (is_object($firstData)) {
             $firstData = $iterObject($firstData, $iterObject);
         }
+
         $acc[] = ["name" => $key, "type" => "-", "children" => $firstData];
         return $acc;
     }, []);
