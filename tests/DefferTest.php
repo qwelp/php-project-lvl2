@@ -16,7 +16,52 @@ class DefferTest extends TestCase
 
         $diff = genDiff($file1, $file2);
         $diffFormate = genDiff($file1, $file2, "plain");
+        $diffFormateJson = genDiff($file1, $file2, "json");
 
+        $expectedFormateJson = '{
+    "  common": {
+        "+ follow": false,
+        "  setting1": "Value 1",
+        "- setting2": 200,
+        "- setting3": true,
+        "+ setting3": null,
+        "+ setting4": "blah blah",
+        "+ setting5": {
+            "  key5": "value5"
+        },
+        "  setting6": {
+            "  doge": {
+                "- wow": "",
+                "+ wow": "so much"
+            },
+            "  key": "value",
+            "+ ops": "vops"
+        }
+    },
+    "  group1": {
+        "- baz": "bas",
+        "+ baz": "bars",
+        "  foo": "bar",
+        "- nest": {
+            "  key": "value"
+        },
+        "+ nest": "str"
+    },
+    "- group2": {
+        "  abc": 12345,
+        "  deep": {
+            "  id": 45
+        }
+    },
+    "+ group3": {
+        "  deep": {
+            "  id": {
+                "  number": 45
+            }
+        },
+        "  fee": 100500
+    }
+}';
         $expectedFormate = "Property 'common.follow' was added with value: false
 Property 'common.setting2' was removed
 Property 'common.setting3' was updated. From true to null
@@ -74,6 +119,7 @@ Property 'group3' was added with value: [complex value]";
 }";
         $this->assertEquals($expected, $diff);
         $this->assertEquals($expectedFormate, $diffFormate);
+        $this->assertEquals($expectedFormateJson, $diffFormateJson);
     }
 
     public function testExceptionFileNotFound(): void

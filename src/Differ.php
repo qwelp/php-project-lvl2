@@ -13,7 +13,35 @@ function genDiff(string $pathToFile1, string $pathToFile2, string $format = ""):
     if ($format === "plain") {
         return plain($data);
     }
+    if ($format === "json") {
+        return json($data);
+    }
     return stylish($data);
+}
+
+function json(array $data): mixed
+{
+    $iter = function ($data, &$iter) {
+        return array_reduce($data, function ($acc, $node) use ($iter) {
+            $name = $node['name'];
+            $type = $node['type'];
+            $children = $node['children'];
+
+            if (is_array($children)) {
+                $acc["{$node['type']} {$name}"] = $iter($children, $iter);
+                return $acc;
+            }
+
+            $acc["{$type} {$name}"] = $children;
+            return $acc;
+        }, []);
+    };
+
+    $result = array_reduce($data, function ($acc, $node) use ($iter) {
+        $acc["{$node['type']} {$node['name']}"] = $iter($node['children'], $iter);
+        return $acc;
+    }, []);
+    return json_encode($result, JSON_PRETTY_PRINT);
 }
 
 function plain(array $data): string
