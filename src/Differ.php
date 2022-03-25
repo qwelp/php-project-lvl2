@@ -22,9 +22,7 @@ function json(array $data): mixed
 {
     $iter = function ($data, &$iter) {
         return array_reduce($data, function ($acc, $node) use ($iter) {
-            $name = $node['name'];
-            $type = $node['type'];
-            $children = $node['children'];
+            ["name" => $name, "type" => $type, "children" => $children] = $node;
             if (is_array($children)) {
                 $acc["{$node['type']} {$name}"] = $iter($children, $iter);
                 return $acc;
@@ -45,9 +43,7 @@ function plainIter(array $data, array $path): string
     $result = "";
     $keyUpdate = [];
     foreach ($data as $node) {
-        $name = $node['name'];
-        $type = $node['type'];
-        $children = $node['children'];
+        ["name" => $name, "type" => $type, "children" => $children] = $node;
         $pathMain = [...$path, ...[$name]];
         $newPath = count($path) ? implode(".", $path) . "." . $name : $name;
         $update = array_values(array_filter($data, function ($item) use ($name) {
@@ -99,9 +95,7 @@ function stylishIter(array $data, int $tabCount = 0): string
     $strTab = str_repeat(" ", $tabCount + 2);
     $strTab2 = str_repeat(" ", $tabCount + 4);
     foreach ($data as $node) {
-        $name = $node['name'];
-        $type = $node['type'];
-        $children = $node['children'];
+        ["name" => $name, "type" => $type, "children" => $children] = $node;
         if (is_array($children)) {
             $result .= PHP_EOL . $strTab . "{$type} {$name}: {"
                 . stylishIter($children, $tabCount + 4) . PHP_EOL . $strTab2 . "}";
@@ -136,9 +130,9 @@ function iterObject(mixed $secondData): array
     foreach ((array) $secondData as $key => $value) {
         if (is_object($secondData->$key)) {
             $result[] = ["name" => $key, "type" => " ", "object" => "Y", "children" => iterObject($secondData->$key)];
-        } else {
-            $result[] = ["name" => $key, "type" => " ", "object" => "Y", "children" => $value];
+            continue;
         }
+        $result[] = ["name" => $key, "type" => " ", "object" => "Y", "children" => $value];
     }
     return $result;
 }
