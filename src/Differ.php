@@ -40,9 +40,8 @@ function json(array $data): mixed
 
 function plainIter(array $data, array $path): string
 {
-    $result = "";
     $keyUpdate = [];
-    foreach ($data as $node) {
+    return array_reduce($data, function ($acc, $node) use ($data, $path, &$keyUpdate) {
         ["name" => $name, "type" => $type, "children" => $children] = $node;
         $pathMain = [...$path, ...[$name]];
         $newPath = count($path) ? implode(".", $path) . "." . $name : $name;
@@ -57,31 +56,31 @@ function plainIter(array $data, array $path): string
                 $value2 = is_string($value2) ? "'{$value2}'" : stringToBool($value2);
                 $value1 = is_array($value1) ? '[complex value]' : $value1;
                 $value2 = is_array($value2) ? '[complex value]' : $value2;
-                $result .= "Property '{$newPath}' was updated. From {$value1} to {$value2}" . PHP_EOL;
+                $acc .= "Property '{$newPath}' was updated. From {$value1} to {$value2}" . PHP_EOL;
             }
             $keyUpdate[] = $newPath;
-            continue;
+            return $acc;
         }
         if (is_array($children)) {
             if (isset($children[0]['object'])) {
                 if ($type == "+") {
-                    $result .= "Property '{$newPath}' was added with value: [complex value]" . PHP_EOL;
+                    $acc .= "Property '{$newPath}' was added with value: [complex value]" . PHP_EOL;
                 } elseif ($type == "-") {
-                    $result .= "Property '{$newPath}' was removed" . PHP_EOL;
+                    $acc .= "Property '{$newPath}' was removed" . PHP_EOL;
                 }
             } else {
-                $result .= plainIter($children, $pathMain);
+                $acc .= plainIter($children, $pathMain);
             }
-            continue;
+            return $acc;
         }
-        $value = is_string($node['children']) ? "'{$node['children']}'" : stringToBool($node['children']);
+        $value = is_string($children) ? "'{$children}'" : stringToBool($children);
         if ($type == "-") {
-            $result .= "Property '{$newPath}' was removed" . PHP_EOL;
+            $acc .= "Property '{$newPath}' was removed" . PHP_EOL;
         } elseif ($type == "+") {
-            $result .= "Property '{$newPath}' was added with value: {$value}" . PHP_EOL;
+            $acc .= "Property '{$newPath}' was added with value: {$value}" . PHP_EOL;
         }
-    }
-    return $result;
+        return $acc;
+    }, "");
 }
 
 function plain(array $data): string
