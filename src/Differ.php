@@ -64,20 +64,24 @@ function plainIter(array $data, array $path): string
         }
         if (is_array($children)) {
             if (isset($children[0]['object'])) {
+                if ($type == " ") {
+                    continue;
+                }
                 if ($type == "+") {
                     $result .= "Property '{$newPath}' was added with value: [complex value]" . PHP_EOL;
-                } elseif ($type == "-") {
-                    $result .= "Property '{$newPath}' was removed" . PHP_EOL;
+                    continue;
                 }
-            } else {
-                $result .= plainIter($children, $pathMain);
+                $result .= "Property '{$newPath}' was removed" . PHP_EOL;
+                continue;
             }
-            continue;
+            $result .= plainIter($children, $pathMain);
         }
         $value = is_string($node['children']) ? "'{$node['children']}'" : stringToBool($node['children']);
         if ($type == "-") {
             $result .= "Property '{$newPath}' was removed" . PHP_EOL;
-        } elseif ($type == "+") {
+            continue;
+        }
+        if ($type == "+") {
             $result .= "Property '{$newPath}' was added with value: {$value}" . PHP_EOL;
         }
     }
