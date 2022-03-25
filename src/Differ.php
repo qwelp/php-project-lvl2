@@ -9,7 +9,6 @@ function genDiff(string $pathToFile1, string $pathToFile2, string $format = ""):
     $firstData = parser($pathToFile1);
     $secondData = parser($pathToFile2);
     $data = createData($firstData, $secondData);
-
     if ($format === "plain") {
         return plain($data);
     }
@@ -34,7 +33,6 @@ function json(array $data): mixed
             return $acc;
         }, []);
     };
-
     $result = array_reduce($data, function ($acc, $node) use ($iter) {
         $acc["{$node['type']} {$node['name']}"] = $iter($node['children'], $iter);
         return $acc;
@@ -42,134 +40,104 @@ function json(array $data): mixed
     return json_encode($result, JSON_PRETTY_PRINT);
 }
 
+function plainIter(array $data, array $path): string
+{
+    $result = "";
+    $keyUpdate = [];
+    foreach ($data as $node) {
+        $name = $node['name'];
+        $type = $node['type'];
+        $children = $node['children'];
+        $pathMain = [...$path, ...[$name]];
+        $newPath = count($path) ? implode(".", $path) . "." . $name : $name;
+        $update = array_values(array_filter($data, function ($item) use ($name) {
+            return $item["name"] === $name;
+        }));
+        if (count($update) === 2) {
+            if (!in_array($newPath, $keyUpdate)) {
+                $value1 = $update[0]['children'];
+                $value2 = $update[1]['children'];
+                $value1 = is_string($value1) ? "'{$value1}'" : stringToBool($value1);
+                $value2 = is_string($value2) ? "'{$value2}'" : stringToBool($value2);
+                $value1 = is_array($value1) ? '[complex value]' : $value1;
+                $value2 = is_array($value2) ? '[complex value]' : $value2;
+                $result .= "Property '{$newPath}' was updated. From {$value1} to {$value2}" . PHP_EOL;
+            }
+            $keyUpdate[] = $newPath;
+            continue;
+        }
+        if (is_array($children)) {
+            if (isset($children[0]['object'])) {
+                if ($type == "+") {
+                    $result .= "Property '{$newPath}' was added with value: [complex value]" . PHP_EOL;
+                } elseif ($type == "-") {
+                    $result .= "Property '{$newPath}' was removed" . PHP_EOL;
+                }
+            } else {
+                $result .= plainIter($children, $pathMain);
+            }
+            continue;
+        }
+        $value = is_string($node['children']) ? "'{$node['children']}'" : stringToBool($node['children']);
+        if ($type == "-") {
+            $result .= "Property '{$newPath}' was removed" . PHP_EOL;
+        } elseif ($type == "+") {
+            $result .= "Property '{$newPath}' was added with value: {$value}" . PHP_EOL;
+        }
+    }
+    return $result;
+}
+
 function plain(array $data): string
 {
-    $iter = function (array $data, array $path, &$iter) {
-        $result = "";
-        $keyUpdate = [];
-        foreach ($data as $node) {
-            $name = $node['name'];
-            $type = $node['type'];
-            $children = $node['children'];
+    return trim(plainIter($data, []), PHP_EOL);
+}
 
-            $pathMain = [...$path, ...[$name]];
-
-            if (count($path)) {
-                $newPath = implode(".", $path) . "." . $name;
-            } else {
-                $newPath = $name;
-            }
-
-            $update = array_filter($data, function ($item) use ($name) {
-                return $item["name"] === $name;
-            });
-            $update = array_values($update);
-
-            if (count($update) === 2) {
-                if (!in_array($newPath, $keyUpdate)) {
-                    $value1 = $update[0]['children'];
-                    $value2 = $update[1]['children'];
-                    $value1 = is_string($value1) ? "'{$value1}'" : stringToBool($value1);
-                    $value2 = is_string($value2) ? "'{$value2}'" : stringToBool($value2);
-                    $value1 = is_array($value1) ? '[complex value]' : $value1;
-                    $value2 = is_array($value2) ? '[complex value]' : $value2;
-
-                    $result .= "Property '{$newPath}' was updated. From {$value1} to {$value2}" . PHP_EOL;
-                }
-                $keyUpdate[] = $newPath;
-                continue;
-            }
-
-            if (is_array($children)) {
-                if (isset($children[0]['object'])) {
-                    if ($type == "+") {
-                        $result .= "Property '{$newPath}' was added with value: [complex value]" . PHP_EOL;
-                    } elseif ($type == "-") {
-                        $result .= "Property '{$newPath}' was removed" . PHP_EOL;
-                    }
-                } else {
-                    $result .= $iter($children, $pathMain, $iter);
-                }
-                continue;
-            }
-
-            $value = is_string($node['children']) ? "'{$node['children']}'" : stringToBool($node['children']);
-            if ($type == "-") {
-                $result .= "Property '{$newPath}' was removed" . PHP_EOL;
-            } elseif ($type == "+") {
-                $result .= "Property '{$newPath}' was added with value: {$value}" . PHP_EOL;
-            }
+function stylishIter(array $data, int $tabCount = 0): string
+{
+    $result = "";
+    $strTab = str_repeat(" ", $tabCount + 2);
+    $strTab2 = str_repeat(" ", $tabCount + 4);
+    foreach ($data as $node) {
+        $name = $node['name'];
+        $type = $node['type'];
+        $children = $node['children'];
+        if (is_array($children)) {
+            $result .= PHP_EOL . $strTab . "{$type} {$name}: {"
+                . stylishIter($children, $tabCount + 4) . PHP_EOL . $strTab2 . "}";
+        } else {
+            $result .= PHP_EOL . $strTab . "{$type} {$name}: " . stringToBool($children);
         }
-        return $result;
-    };
-
-    return trim($iter($data, [], $iter), PHP_EOL);
+    }
+    return $result;
 }
 
 function stylish(array $data): string
 {
-    $iter = function ($data, &$iter, $tabCount) {
-        $result = "";
-        $strTab = str_repeat(" ", $tabCount + 2);
-        $strTab2 = str_repeat(" ", $tabCount + 4);
-
-        foreach ((array) $data as $node) {
-            $name = $node['name'];
-            $type = $node['type'];
-            $children = $node['children'];
-
-            if (is_array($children)) {
-                $result .= PHP_EOL . $strTab . "{$type} {$name}: {"
-                        . $iter($children, $iter, $tabCount + 4) . PHP_EOL . $strTab2 . "}";
-            } else {
-                $result .= PHP_EOL . $strTab . "{$type} {$name}: " . stringToBool($children);
-            }
-        }
-        return $result;
-    };
-
-    $result = "";
-    $result .= "{" . PHP_EOL;
+    $result = "{" . PHP_EOL;
     foreach ($data as $node) {
         $children = $node["children"];
         if (is_array($children)) {
-            $result .= "  {$node["type"]} {$node["name"]}: {" . $iter($children, $iter, 4) . PHP_EOL . "    }";
+            $result .= "  {$node["type"]} {$node["name"]}: {" . stylishIter($children, 4) . PHP_EOL . "    }";
         } else {
             $result .= "  {$node["type"]} {$node["name"]}: " . $children;
         }
         $result .= PHP_EOL;
     }
-    $result .= "}";
-    return $result;
+    return $result . "}";
 }
 
 function iterObject(mixed $secondData): array
 {
     if (!is_object($secondData)) {
-        return [
-            "name" => key($secondData),
-            "type" => " ",
-            "object" => "Y",
-            "value" => $secondData
-        ];
+        return ["name" => key($secondData), "type" => " ", "object" => "Y", "value" => $secondData];
     }
-
     $result = [];
     foreach ((array) $secondData as $key => $value) {
         if (is_object($secondData->$key)) {
-            $result[] = [
-                "name" => $key,
-                "type" => " ",
-                "object" => "Y",
-                "children" => iterObject($secondData->$key)
-            ];
+            $result[] = ["name" => $key, "type" => " ", "object" => "Y", "children" => iterObject($secondData->$key)];
         } else {
-            $result[] = [
-                "name" => $key,
-                "type" => " ",
-                "object" => "Y",
-                "children" => $value
-            ];
+            $result[] = ["name" => $key, "type" => " ", "object" => "Y", "children" => $value];
         }
     }
     return $result;
@@ -177,25 +145,15 @@ function iterObject(mixed $secondData): array
 
 function createDataIter(string $keyNode, mixed $data1, mixed $data2): array
 {
-    $keys = createKeys($data1, $data2);
-    return array_reduce($keys, function ($acc, $key) use ($data1, $data2, $keyNode) {
+    return array_reduce(createKeys($data1, $data2), function ($acc, $key) use ($data1, $data2, $keyNode) {
         $firstData = $data1->$key ?? null;
         $secondData = $data2->$key ?? null;
         if (is_object($firstData) && is_object($secondData)) {
-            $acc[] = ["name" => $key, "type" => " ",
-                "children" => createDataIter($keyNode, $firstData, $secondData)];
+            $acc[] = ["name" => $key, "type" => " ", "children" => createDataIter($keyNode, $firstData, $secondData)];
             return $acc;
         }
-        if ($firstData && is_object($firstData)) {
-            $dataValue1 = iterObject($firstData);
-        } else {
-            $dataValue1 = $firstData;
-        }
-        if ($secondData && is_object($secondData)) {
-            $dataValue2 = iterObject($secondData);
-        } else {
-            $dataValue2 = $secondData;
-        }
+        $dataValue1 = $firstData && is_object($firstData) ? iterObject($firstData) : $firstData;
+        $dataValue2 = $secondData && is_object($secondData) ? iterObject($secondData) : $secondData;
         if (property_exists($data1, $key) && property_exists($data2, $key)) {
             if ($data1->$key === $data2->$key) {
                 $acc[] = ["name" => $key, "type" => " ", "children" => $dataValue1];
@@ -204,8 +162,7 @@ function createDataIter(string $keyNode, mixed $data1, mixed $data2): array
             $acc[] = ["name" => $key, "type" => "-", "children" => $dataValue1];
             $acc[] = ["name" => $key, "type" => "+", "children" => $dataValue2];
             return $acc;
-        }
-        if (property_exists($data1, $key)) {
+        } elseif (property_exists($data1, $key)) {
             $acc[] = ["name" => $key, "type" => "-", "children" => $dataValue1];
             return $acc;
         }
@@ -260,9 +217,7 @@ function createData(object $data1, object $data2): array
 
 function createKeys(object $data1, object $data2): array
 {
-    $firstKeys = array_keys((array)$data1);
-    $secondKeys = array_keys((array)$data2);
-    $keys  = array_unique(array_merge($firstKeys, $secondKeys));
+    $keys  = array_unique(array_merge(array_keys((array)$data1), array_keys((array)$data2)));
     sort($keys);
     return $keys;
 }
@@ -275,6 +230,5 @@ function stringToBool(mixed $value): mixed
     if (is_null($value)) {
         return "null";
     }
-
     return $value;
 }
