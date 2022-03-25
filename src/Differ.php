@@ -175,60 +175,50 @@ function iterObject(mixed $secondData): array
     return $result;
 }
 
-function createData(object $data1, object $data2): array
+function createDataIter(string $keyNode, mixed $data1, mixed $data2): array
 {
-    $iter = function ($keyNode, $data1, $data2, &$iter) {
-
-        $keys = createKeys($data1, $data2);
-
-        return array_reduce($keys, function ($acc, $key) use ($data1, $data2, $keyNode, $iter) {
-
-            $firstData = $data1->$key ?? null;
-            $secondData = $data2->$key ?? null;
-
-            if (is_object($firstData) && is_object($secondData)) {
-                $acc[] = ["name" => $key, "type" => " ",
-                    "children" => $iter($keyNode, $firstData, $secondData, $iter)];
-                return $acc;
-            }
-
-            if ($firstData && is_object($firstData)) {
-                $dataValue1 = iterObject($firstData);
-            } else {
-                $dataValue1 = $firstData;
-            }
-
-            if ($secondData && is_object($secondData)) {
-                $dataValue2 = iterObject($secondData);
-            } else {
-                $dataValue2 = $secondData;
-            }
-
-            if (property_exists($data1, $key) && property_exists($data2, $key)) {
-                if ($data1->$key === $data2->$key) {
-                    $acc[] = ["name" => $key, "type" => " ", "children" => $dataValue1];
-                    return $acc;
-                }
-
-                $acc[] = ["name" => $key, "type" => "-", "children" => $dataValue1];
-                $acc[] = ["name" => $key, "type" => "+", "children" => $dataValue2];
-                return $acc;
-            }
-
-            if (property_exists($data1, $key)) {
-                $acc[] = ["name" => $key, "type" => "-", "children" => $dataValue1];
-                return $acc;
-            }
-
-            $acc[] = ["name" => $key, "type" => "+", "children" => $dataValue2];
-            return $acc;
-        }, []);
-    };
-
-    return array_reduce(createKeys($data1, $data2), function ($acc, $key) use ($data1, $data2, $iter) {
+    $keys = createKeys($data1, $data2);
+    return array_reduce($keys, function ($acc, $key) use ($data1, $data2, $keyNode) {
         $firstData = $data1->$key ?? null;
         $secondData = $data2->$key ?? null;
+        if (is_object($firstData) && is_object($secondData)) {
+            $acc[] = ["name" => $key, "type" => " ",
+                "children" => createDataIter($keyNode, $firstData, $secondData)];
+            return $acc;
+        }
+        if ($firstData && is_object($firstData)) {
+            $dataValue1 = iterObject($firstData);
+        } else {
+            $dataValue1 = $firstData;
+        }
+        if ($secondData && is_object($secondData)) {
+            $dataValue2 = iterObject($secondData);
+        } else {
+            $dataValue2 = $secondData;
+        }
+        if (property_exists($data1, $key) && property_exists($data2, $key)) {
+            if ($data1->$key === $data2->$key) {
+                $acc[] = ["name" => $key, "type" => " ", "children" => $dataValue1];
+                return $acc;
+            }
+            $acc[] = ["name" => $key, "type" => "-", "children" => $dataValue1];
+            $acc[] = ["name" => $key, "type" => "+", "children" => $dataValue2];
+            return $acc;
+        }
+        if (property_exists($data1, $key)) {
+            $acc[] = ["name" => $key, "type" => "-", "children" => $dataValue1];
+            return $acc;
+        }
+        $acc[] = ["name" => $key, "type" => "+", "children" => $dataValue2];
+        return $acc;
+    }, []);
+}
 
+function createData(object $data1, object $data2): array
+{
+    return array_reduce(createKeys($data1, $data2), function ($acc, $key) use ($data1, $data2) {
+        $firstData = $data1->$key ?? null;
+        $secondData = $data2->$key ?? null;
         if (!is_object($firstData) && !is_object($secondData)) {
             if ($firstData === $secondData) {
                 $acc[] = ["name" => $key, "type" => " ", "children" => stringToBool($firstData)];
@@ -246,15 +236,13 @@ function createData(object $data1, object $data2): array
             $acc[] = ["name" => $key, "type" => "+", "children" => stringToBool($secondData)];
             return $acc;
         }
-
         if (!is_null($firstData)  && !is_null($secondData)) {
             if (gettype($firstData) === "object" && gettype($secondData) === "object") {
                 $acc[] = ["name" => $key, "type" => " ",
-                    "children" => $iter($key, $data1->$key, $data2->$key, $iter)];
+                    "children" => createDataIter($key, $data1->$key, $data2->$key)];
             }
             return $acc;
         }
-
         if (is_null($firstData)) {
             if (is_object($secondData)) {
                 $secondData = iterObject($secondData);
@@ -262,11 +250,9 @@ function createData(object $data1, object $data2): array
             $acc[] = ["name" => $key, "type" => "+", "children" => $secondData];
             return $acc;
         }
-
         if (is_object($firstData)) {
             $firstData = iterObject($firstData);
         }
-
         $acc[] = ["name" => $key, "type" => "-", "children" => $firstData];
         return $acc;
     }, []);
