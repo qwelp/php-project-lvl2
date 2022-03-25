@@ -79,7 +79,10 @@ function plain(array $data): string
                     $result .= "Property '{$newPath}' was updated. From {$value1} to {$value2}" . PHP_EOL;
                 }
                 $keyUpdate[] = $newPath;
-            } elseif (is_array($children)) {
+                continue;
+            }
+
+            if (is_array($children)) {
                 if (isset($children[0]['object'])) {
                     if ($type == "+") {
                         $result .= "Property '{$newPath}' was added with value: [complex value]" . PHP_EOL;
@@ -89,14 +92,14 @@ function plain(array $data): string
                 } else {
                     $result .= $iter($children, $pathMain, $iter);
                 }
-            } else {
-                $value = is_string($node['children']) ? "'{$node['children']}'" : stringToBool($node['children']);
+                continue;
+            }
 
-                if ($type == "-") {
-                    $result .= "Property '{$newPath}' was removed" . PHP_EOL;
-                } elseif ($type == "+") {
-                    $result .= "Property '{$newPath}' was added with value: {$value}" . PHP_EOL;
-                }
+            $value = is_string($node['children']) ? "'{$node['children']}'" : stringToBool($node['children']);
+            if ($type == "-") {
+                $result .= "Property '{$newPath}' was removed" . PHP_EOL;
+            } elseif ($type == "+") {
+                $result .= "Property '{$newPath}' was added with value: {$value}" . PHP_EOL;
             }
         }
         return $result;

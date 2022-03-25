@@ -22,9 +22,9 @@ class DefferTest extends TestCase
 
         $diff_yml_1 = genDiff($file_yml_1_1, $file_yml_1_2);
         $diff_yml_2 = genDiff($file_yml_2_1, $file_yml_2_2);
-        $diff_1 = genDiff($file_json_1_1, $file_json_1_2);
-        $diff = genDiff($file_json_2_1, $file_json_2_2);
-        $diffFormate = genDiff($file_json_2_1, $file_json_2_2, "plain");
+        $diff_json_1 = genDiff($file_json_1_1, $file_json_1_2);
+        $diff_json_2 = genDiff($file_json_2_1, $file_json_2_2);
+        $diffFormatePlain = genDiff($file_json_2_1, $file_json_2_2, "plain");
         $diffFormateJson = genDiff($file_json_2_1, $file_json_2_2, "json");
 
         $expected_1 = '{
@@ -136,10 +136,10 @@ Property 'group3' was added with value: [complex value]";
     }
 }";
         $this->assertEquals($expected_1, $diff_yml_1);
-        $this->assertEquals($expected_1, $diff_1);
-        $this->assertEquals($expected, $diff);
+        $this->assertEquals($expected_1, $diff_json_1);
+        $this->assertEquals($expected, $diff_json_2);
         $this->assertEquals($expected, $diff_yml_2);
-        $this->assertEquals($expectedFormate, $diffFormate);
+        $this->assertEquals($expectedFormate, $diffFormatePlain);
         $this->assertEquals($expectedFormateJson, $diffFormateJson);
     }
 
