@@ -64,24 +64,20 @@ function plainIter(array $data, array $path): string
         }
         if (is_array($children)) {
             if (isset($children[0]['object'])) {
-                if ($type == " ") {
-                    continue;
-                }
                 if ($type == "+") {
                     $result .= "Property '{$newPath}' was added with value: [complex value]" . PHP_EOL;
-                    continue;
+                } elseif ($type == "-") {
+                    $result .= "Property '{$newPath}' was removed" . PHP_EOL;
                 }
-                $result .= "Property '{$newPath}' was removed" . PHP_EOL;
-                continue;
+            } else {
+                $result .= plainIter($children, $pathMain);
             }
-            $result .= plainIter($children, $pathMain);
+            continue;
         }
         $value = is_string($node['children']) ? "'{$node['children']}'" : stringToBool($node['children']);
         if ($type == "-") {
             $result .= "Property '{$newPath}' was removed" . PHP_EOL;
-            continue;
-        }
-        if ($type == "+") {
+        } elseif ($type == "+") {
             $result .= "Property '{$newPath}' was added with value: {$value}" . PHP_EOL;
         }
     }
@@ -130,15 +126,15 @@ function iterObject(mixed $secondData): array
     if (!is_object($secondData)) {
         return ["name" => key($secondData), "type" => " ", "object" => "Y", "value" => $secondData];
     }
-    $result = [];
-    foreach ((array) $secondData as $key => $value) {
+    $data = (array) $secondData;
+    return array_reduce(array_keys($data), function ($acc, $key) use ($secondData) {
         if (is_object($secondData->$key)) {
-            $result[] = ["name" => $key, "type" => " ", "object" => "Y", "children" => iterObject($secondData->$key)];
-            continue;
+            $acc[] = ["name" => $key, "type" => " ", "object" => "Y", "children" => iterObject($secondData->$key)];
+            return $acc;
         }
-        $result[] = ["name" => $key, "type" => " ", "object" => "Y", "children" => $value];
-    }
-    return $result;
+        $acc[] = ["name" => $key, "type" => " ", "object" => "Y", "children" => $secondData->$key];
+        return $acc;
+    }, []);
 }
 
 function createDataIter(string $keyNode, mixed $data1, mixed $data2): array
