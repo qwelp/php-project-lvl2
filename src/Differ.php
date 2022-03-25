@@ -69,10 +69,8 @@ function plain(array $data): string
                 if (!in_array($newPath, $keyUpdate)) {
                     $value1 = $update[0]['children'];
                     $value2 = $update[1]['children'];
-
                     $value1 = is_string($value1) ? "'{$value1}'" : stringToBool($value1);
                     $value2 = is_string($value2) ? "'{$value2}'" : stringToBool($value2);
-
                     $value1 = is_array($value1) ? '[complex value]' : $value1;
                     $value2 = is_array($value2) ? '[complex value]' : $value2;
 
@@ -145,31 +143,63 @@ function stylish(array $data): string
     return $result;
 }
 
+function iterObject(mixed $secondData): array
+{
+    if (!is_object($secondData)) {
+        return [
+            "name" => key($secondData),
+            "type" => " ",
+            "object" => "Y",
+            "value" => $secondData
+        ];
+    }
+
+    $result = [];
+    foreach ((array) $secondData as $key => $value) {
+        if (is_object($secondData->$key)) {
+            $result[] = [
+                "name" => $key,
+                "type" => " ",
+                "object" => "Y",
+                "children" => iterObject($secondData->$key)
+            ];
+        } else {
+            $result[] = [
+                "name" => $key,
+                "type" => " ",
+                "object" => "Y",
+                "children" => $value
+            ];
+        }
+    }
+    return $result;
+}
+
 function createData(object $data1, object $data2): array
 {
-    $iter = function ($keyNode, $data1, $data2, $iterObject, &$iter) {
+    $iter = function ($keyNode, $data1, $data2, &$iter) {
 
         $keys = createKeys($data1, $data2);
 
-        return array_reduce($keys, function ($acc, $key) use ($data1, $data2, $keyNode, $iterObject, $iter) {
+        return array_reduce($keys, function ($acc, $key) use ($data1, $data2, $keyNode, $iter) {
 
             $firstData = $data1->$key ?? null;
             $secondData = $data2->$key ?? null;
 
             if (is_object($firstData) && is_object($secondData)) {
                 $acc[] = ["name" => $key, "type" => " ",
-                    "children" => $iter($keyNode, $firstData, $secondData, $iterObject, $iter)];
+                    "children" => $iter($keyNode, $firstData, $secondData, $iter)];
                 return $acc;
             }
 
             if ($firstData && is_object($firstData)) {
-                $dataValue1 = $iterObject($firstData, $iterObject);
+                $dataValue1 = iterObject($firstData);
             } else {
                 $dataValue1 = $firstData;
             }
 
             if ($secondData && is_object($secondData)) {
-                $dataValue2 = $iterObject($secondData, $iterObject);
+                $dataValue2 = iterObject($secondData);
             } else {
                 $dataValue2 = $secondData;
             }
@@ -195,39 +225,7 @@ function createData(object $data1, object $data2): array
         }, []);
     };
 
-    $iterObject = function ($secondData, &$iterObject) {
-
-        if (!is_object($secondData)) {
-            return [
-                "name" => key($secondData),
-                "type" => " ",
-                "object" => "Y",
-                "value" => $secondData
-            ];
-        }
-
-        $result = [];
-        foreach ((array) $secondData as $key => $value) {
-            if (is_object($secondData->$key)) {
-                $result[] = [
-                    "name" => $key,
-                    "type" => " ",
-                    "object" => "Y",
-                    "children" => $iterObject($secondData->$key, $iterObject)
-                ];
-            } else {
-                $result[] = [
-                    "name" => $key,
-                    "type" => " ",
-                    "object" => "Y",
-                    "children" => $value
-                ];
-            }
-        }
-        return $result;
-    };
-
-    return array_reduce(createKeys($data1, $data2), function ($acc, $key) use ($data1, $data2, $iter, $iterObject) {
+    return array_reduce(createKeys($data1, $data2), function ($acc, $key) use ($data1, $data2, $iter) {
         $firstData = $data1->$key ?? null;
         $secondData = $data2->$key ?? null;
 
@@ -252,21 +250,21 @@ function createData(object $data1, object $data2): array
         if (!is_null($firstData)  && !is_null($secondData)) {
             if (gettype($firstData) === "object" && gettype($secondData) === "object") {
                 $acc[] = ["name" => $key, "type" => " ",
-                    "children" => $iter($key, $data1->$key, $data2->$key, $iterObject, $iter)];
+                    "children" => $iter($key, $data1->$key, $data2->$key, $iter)];
             }
             return $acc;
         }
 
         if (is_null($firstData)) {
             if (is_object($secondData)) {
-                $secondData = $iterObject($secondData, $iterObject);
+                $secondData = iterObject($secondData);
             }
             $acc[] = ["name" => $key, "type" => "+", "children" => $secondData];
             return $acc;
         }
 
         if (is_object($firstData)) {
-            $firstData = $iterObject($firstData, $iterObject);
+            $firstData = iterObject($firstData);
         }
 
         $acc[] = ["name" => $key, "type" => "-", "children" => $firstData];
