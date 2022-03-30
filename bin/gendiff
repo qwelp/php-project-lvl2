@@ -13,8 +13,6 @@ if (file_exists($autoloadPath1)) {
 use function Differ\Differ\genDiff;
 
 $doc = <<<DOC
-gendiff -h
-
 Generate diff
 
 Usage:
@@ -36,9 +34,8 @@ foreach ($result as $k => $v)
 $args = Docopt::handle($doc);
 
 $path = __DIR__ . "/../tests/fixtures/";
-$file1 = $path . $args["<firstFile>"];
-$file2 = $path . $args["<secondFile>"];
+$file1 = $args["<firstFile>"];
+$file2 = $args["<secondFile>"];
 $fmt = $args["--format"] ?? "";
-
 
 echo genDiff($file1, $file2, $fmt);
