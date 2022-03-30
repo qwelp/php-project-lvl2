@@ -17,6 +17,7 @@ class DifferTest extends TestCase
          * Чтобы избежать дублирования рекомендую использовать dataprovider
          *
          * ---- Тут все файлы разные, не дублируются! ----
+         *
          */
         $pathFixture = __DIR__ . "/fixtures/";
         $fileJson21 = $pathFixture . "file_json_2_1.json";
