@@ -17,7 +17,7 @@ function parser(string $file): mixed
     }
 
     $formatFile = pathinfo($file, PATHINFO_EXTENSION);
-    if ($formatFile === "yml") {
+    if ($formatFile === "yml" || $formatFile === "yaml") {
         return Yaml::parse($data, Yaml::PARSE_OBJECT_FOR_MAP);
     }
     return json_decode($data);
