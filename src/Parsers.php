@@ -4,7 +4,7 @@ namespace Differ\Parsers;
 
 use Symfony\Component\Yaml\Yaml;
 
-function parser(string $file): object
+function parser(string $file): object|array
 {
     if (!file_exists($file)) {
         throw new \Exception("File not found.");
@@ -19,6 +19,7 @@ function parser(string $file): object
 
     return match ($formatFile) {
         "json" => json_decode($data),
-        "yml" => Yaml::parse($data, Yaml::PARSE_OBJECT_FOR_MAP)
+        "yml" => Yaml::parse($data, Yaml::PARSE_OBJECT_FOR_MAP),
+        default => [],
     };
 }
