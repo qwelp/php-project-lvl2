@@ -33,11 +33,12 @@ foreach ($result as $k => $v)
 
 $args = Docopt::handle($doc);
 
-$path = __DIR__ . "/../tests/fixtures/";
-$file1 = $args["<firstFile>"];
-$file2 = $args["<secondFile>"];
-$fmt = $args["--format"] ?? "";
+$data = (array) $args;
 
-$result = genDiff($file1, $file2, $fmt);
+$path1 = $data['args']['<firstFile>'];
+$path2 = $data['args']['<secondFile>'];
+$format = $data['args']['--format'];
+
+$result = genDiff($path1, $path2, $format);
 
 print_r($result);
