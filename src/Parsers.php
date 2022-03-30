@@ -13,7 +13,7 @@ function parser(string $file): object
     $formatFile = pathinfo($file, PATHINFO_EXTENSION);
     $data = file_get_contents($file);
 
-    if (empty($data)) {
+    if (!$data) {
         throw new \Exception("File empty.");
     }
 
