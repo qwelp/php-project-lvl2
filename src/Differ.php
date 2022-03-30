@@ -208,7 +208,7 @@ function createData(mixed $data1, mixed $data2): array
     }, []);
 }
 
-function createKeys(object $data1, object $data2): array
+function createKeys(mixed $data1, mixed $data2): array
 {
     $keys  = array_unique(array_merge(array_keys((array)$data1), array_keys((array)$data2)));
     sort($keys);
