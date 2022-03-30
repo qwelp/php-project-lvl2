@@ -4,7 +4,7 @@ namespace Differ\Parsers;
 
 use Symfony\Component\Yaml\Yaml;
 
-function parser(string $file): object
+function parser(string $file): mixed
 {
     if (!file_exists($file)) {
         throw new \Exception("File not found.");
