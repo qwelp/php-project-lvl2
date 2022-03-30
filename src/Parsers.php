@@ -19,7 +19,6 @@ function parser(string $file): object
 
     return match ($formatFile) {
         "json" => json_decode($data),
-        "yml" => Yaml::parse($data, Yaml::PARSE_OBJECT_FOR_MAP),
-        default => [],
+        "yml" => Yaml::parse($data, Yaml::PARSE_OBJECT_FOR_MAP)
     };
 }
