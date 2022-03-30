@@ -164,7 +164,7 @@ function createDataIter(string $keyNode, mixed $data1, mixed $data2): array
     }, []);
 }
 
-function createData(object $data1, object $data2): array
+function createData(mixed $data1, mixed $data2): array
 {
     return array_reduce(createKeys($data1, $data2), function ($acc, $key) use ($data1, $data2) {
         $firstData = $data1->$key ?? null;
