@@ -10,13 +10,13 @@ function parser(string $file): object
         throw new \Exception("File not found.");
     }
 
-    $formatFile = pathinfo($file, PATHINFO_EXTENSION);
     $data = file_get_contents($file);
 
-    if (!trim($data)) {
+    if (empty($data)) {
         throw new \Exception("File empty.");
     }
 
+    $formatFile = pathinfo($file, PATHINFO_EXTENSION);
     if ($formatFile === "yml") {
         return Yaml::parse($data, Yaml::PARSE_OBJECT_FOR_MAP);
     }
