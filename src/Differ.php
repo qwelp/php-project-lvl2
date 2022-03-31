@@ -18,27 +18,25 @@ function genDiff(string $pathToFile1, string $pathToFile2, string $format = ""):
     return stylish($data);
 }
 
-function jsonIter(array $data): array
-{
-    return array_reduce($data, function ($acc, $node) {
-        ["name" => $name, "type" => $type, "children" => $children] = $node;
-        $result = $acc;
-        if (is_array($children)) {
-            $result["{$node['type']} {$name}"] = jsonIter($children);
-            return $result;
-        }
-        $result["{$type} {$name}"] = $children;
-        return $result;
-    }, []);
-}
-
 function json(array $data): mixed
 {
-    $result = array_reduce($data, function ($acc, $node) {
-        $acc["{$node['type']} {$node['name']}"] = jsonIter($node['children']);
-        return $acc;
-    }, []);
-    return json_encode($result, JSON_PRETTY_PRINT);
+    $iter = function ($data, &$iter) {
+        return array_reduce($data, function ($acc, $node) use ($iter) {
+            ["name" => $name, "type" => $type, "children" => $children] = $node;
+            if (is_array($children)) {
+                $acc["{$node['type']} {$name}"] = $iter($children, $iter);
+                return $acc;
+            }
+            $acc["{$type} {$name}"] = $children;
+            return $acc;
+        }, []);
+    };
+
+    $resultData = [];
+    array_map(function ($node) use ($iter, &$resultData) {
+        $resultData["{$node['type']} {$node['name']}"] = $iter($node['children'], $iter);
+    }, $data);
+    return json_encode($resultData, JSON_PRETTY_PRINT);
 }
 
 function plainIter(array $data, array $path): string
