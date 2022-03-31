@@ -18,8 +18,9 @@ function parser(string $file): mixed
 
     $formatFile = pathinfo($file, PATHINFO_EXTENSION);
 
-    if ($formatFile === "yml" || $formatFile === "yaml") {
-        return Yaml::parse($data, Yaml::PARSE_OBJECT_FOR_MAP);
-    }
-    return json_decode($data);
+    return match ($formatFile) {
+        'yml', 'yaml' => Yaml::parse($data, Yaml::PARSE_OBJECT_FOR_MAP),
+        'json' => json_decode($data),
+        default => throw new \Exception("uknown extension: '{$formatFile}'!"),
+    };
 }
