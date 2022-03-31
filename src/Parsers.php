@@ -12,7 +12,7 @@ function parser(string $file): mixed
 
     $data = file_get_contents($file);
 
-    if (empty($data)) {
+    if (!strlen($data)) {
         throw new \Exception("File empty.");
     }
 
