@@ -22,12 +22,13 @@ function jsonIter(array $data): array
 {
     return array_reduce($data, function ($acc, $node) {
         ["name" => $name, "type" => $type, "children" => $children] = $node;
+        $result = $acc;
         if (is_array($children)) {
-            $acc["{$node['type']} {$name}"] = jsonIter($children);
-            return $acc;
+            $result["{$node['type']} {$name}"] = jsonIter($children);
+            return $result;
         }
-        $acc["{$type} {$name}"] = $children;
-        return $acc;
+        $result["{$type} {$name}"] = $children;
+        return $result;
     }, []);
 }
 
