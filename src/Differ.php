@@ -18,21 +18,23 @@ function genDiff(string $pathToFile1, string $pathToFile2, string $format = ""):
     return stylish($data);
 }
 
+function jsonIter(array $data): array
+{
+    return array_reduce($data, function ($acc, $node) {
+        ["name" => $name, "type" => $type, "children" => $children] = $node;
+        if (is_array($children)) {
+            $acc["{$node['type']} {$name}"] = jsonIter($children);
+            return $acc;
+        }
+        $acc["{$type} {$name}"] = $children;
+        return $acc;
+    }, []);
+}
+
 function json(array $data): mixed
 {
-    $iter = function ($data, &$iter) {
-        return array_reduce($data, function ($acc, $node) use ($iter) {
-            ["name" => $name, "type" => $type, "children" => $children] = $node;
-            if (is_array($children)) {
-                $acc["{$node['type']} {$name}"] = $iter($children, $iter);
-                return $acc;
-            }
-            $acc["{$type} {$name}"] = $children;
-            return $acc;
-        }, []);
-    };
-    $result = array_reduce($data, function ($acc, $node) use ($iter) {
-        $acc["{$node['type']} {$node['name']}"] = $iter($node['children'], $iter);
+    $result = array_reduce($data, function ($acc, $node) {
+        $acc["{$node['type']} {$node['name']}"] = jsonIter($node['children']);
         return $acc;
     }, []);
     return json_encode($result, JSON_PRETTY_PRINT);
