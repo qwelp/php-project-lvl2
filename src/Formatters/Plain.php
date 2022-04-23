@@ -4,12 +4,10 @@ namespace Differ\Formatters\Plain;
 
 function getNormalizeValue(mixed $value): string
 {
-    if (is_numeric($value)) {
-        return $value === 0 ? "''" : "'{$value}'";
-    } elseif (is_object($value)) {
+    if (is_object($value)) {
         return '[complex value]';
     } elseif (is_string($value)) {
-        return "'{$value}'";
+        return "--- '{$value}'";
     } elseif (is_bool($value)) {
         return $value ? 'true' : 'false';
     } elseif (is_null($value)) {
