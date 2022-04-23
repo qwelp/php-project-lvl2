@@ -14,10 +14,10 @@ function getNormalizeValue(mixed $value): mixed
         return "null";
     } else {
         $json = json_encode($value);
-        if (!$json) {
-            return "0";
+        if (is_string($json)) {
+            return json_encode($value);
         }
-        return json_encode($value);
+        return "0";
     }
 }
 
