@@ -11,7 +11,7 @@ function getNormalizeValue(mixed $value): string
     } elseif (is_bool($value)) {
         return $value ? 'true' : 'false';
     } elseif (is_null($value)) {
-        return 'null';
+        return "null";
     } else {
         $jsonValue = json_encode($value);
         return  !empty($jsonValue) ? $jsonValue : "";
