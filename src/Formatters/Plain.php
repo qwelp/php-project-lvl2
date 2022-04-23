@@ -13,8 +13,7 @@ function getNormalizeValue(mixed $value): string
     } elseif (is_null($value)) {
         return "null";
     } else {
-        $jsonValue = json_encode($value);
-        return !empty($jsonValue) ? $jsonValue : "0";
+        return json_encode($value) ? json_encode($value) : "0";
     }
 }
 
