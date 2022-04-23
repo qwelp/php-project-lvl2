@@ -8,6 +8,10 @@ function getNormalizeValue(mixed $value): string
         return '[complex value]';
     } elseif (is_string($value)) {
         return "'{$value}'";
+    } elseif (is_bool($value)) {
+        return $value ? 'true' : 'false';
+    } elseif (is_null($value)) {
+        return 'null';
     } else {
         $jsonValue = json_encode($value);
         return  !empty($jsonValue) ? $jsonValue : "";
