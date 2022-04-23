@@ -26,10 +26,6 @@ class DifferTest extends TestCase
         } else {
             $expected = $content;
         }
-        
-        echo "<pre>";
-        var_dump(is_object(0));
-        echo "</pre>";
 
         $this->assertEquals($expected, $actual);
     }
