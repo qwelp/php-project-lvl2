@@ -1,6 +1,6 @@
 <?php
 
-namespace Php\Package\Tests;
+namespace Differ\Tests;
 
 use PHPUnit\Framework\TestCase;
 
@@ -8,55 +8,37 @@ use function Differ\Differ\genDiff;
 
 class DifferTest extends TestCase
 {
-    public function testDiffer(): void
+    private function getFilePath(string $name): string
     {
-        /*
-         * Чтобы избавиться от дублирования, лучше завести функцию, которая в зависимости от имени вернет нам
-         * необходимую фикстуру.
-         *
-         * Чтобы избежать дублирования рекомендую использовать dataprovider
-         *
-         * ---- Тут все файлы разные, не дублируются! ----
-         *
-         */
-        $pathFixture = __DIR__ . "/fixtures/";
-        $fileJson21 = $pathFixture . "file_json_2_1.json";
-        $fileJson22 = $pathFixture . "file_json_2_2.json";
-        $fileYml11 = $pathFixture . "file_yml_1_1.yml";
-        $fileYml12 = $pathFixture . "file_yml_1_2.yml";
-        $fileYml21 = $pathFixture . "file_yml_2_1.yml";
-        $fileYml22 = $pathFixture . "file_yml_2_2.yml";
-        $fileJson11 = $pathFixture . "file_json_1_1.json";
-        $fileJson12 = $pathFixture . "file_json_1_2.json";
-
-        $expectedJson1 = file_get_contents("{$pathFixture}jsonExpected1.txt");
-        $expectedFormateJson = file_get_contents("{$pathFixture}expectedFormateJson.txt");
-        $expectedFormate = file_get_contents("{$pathFixture}expectedFormatePlain.txt");
-        $expectedTree = file_get_contents("{$pathFixture}expectedTree.txt");
-        $this->assertEquals($expectedJson1, genDiff($fileYml11, $fileYml12));
-        $this->assertEquals($expectedJson1, genDiff($fileJson11, $fileJson12));
-        $this->assertEquals($expectedTree, genDiff($fileJson21, $fileJson22));
-        $this->assertEquals($expectedTree, genDiff($fileYml21, $fileYml22));
-        $this->assertEquals($expectedFormate, genDiff($fileJson21, $fileJson22, "plain"));
-        $this->assertEquals($expectedFormateJson, genDiff($fileJson21, $fileJson22, "json"));
+        return __DIR__ . '/fixtures/' . $name;
     }
 
-    public function testExceptionFileNotFound(): void
+    /**
+     * @dataProvider diffProvider
+     */
+
+    public function testDiff(string $file1, string $file2, string $format, string $expectedFileName): void
     {
-        $pathFixture = __DIR__ . "/fixtures/";
-        $file2 = $pathFixture . "file2.json";
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('File not found.');
-        genDiff('', $file2);
+        $actual = genDiff($this->getFilePath($file1), $this->getFilePath($file2), $format);
+        $content = file_get_contents($this->getFilePath($expectedFileName));
+        if ($expectedFileName === 'json.txt' && !empty($content)) {
+            $expected = str_replace(["-", "\n"], "", $content);
+        } else {
+            $expected = $content;
+        }
+
+        $this->assertEquals($expected, $actual);
     }
 
-    public function testExceptionFileEmpty(): void
+    public function diffProvider(): array
     {
-        $pathFixture = __DIR__ . "/fixtures/";
-        $file1 = $pathFixture . "file1.json";
-        $fileEmpty = $pathFixture . "fileEmpty.json";
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('File empty.');
-        genDiff($file1, $fileEmpty);
+        return [
+            ['file1.json', 'file2.json', 'stylish', 'nested.txt'],
+            ['file1.yml', 'file2.yml', 'stylish', 'nested.txt'],
+            ['file1.json', 'file2.json', 'plain', 'plain.txt'],
+            ['file1.yml', 'file2.yml', 'plain', 'plain.txt'],
+            ['file1.json', 'file2.json', 'json', 'json.txt'],
+            ['file1.yml', 'file2.yml', 'json', 'json.txt']
+        ];
     }
 }

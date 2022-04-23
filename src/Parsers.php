@@ -4,23 +4,11 @@ namespace Differ\Parsers;
 
 use Symfony\Component\Yaml\Yaml;
 
-function parser(string $file): mixed
+function getDataParsing(string $data, string $extension): object
 {
-    if (!file_exists($file)) {
-        throw new \Exception("File not found.");
-    }
-
-    $data = file_get_contents($file);
-
-    if ($data === false || $data === "") {
-        throw new \Exception("File empty.");
-    }
-
-    $formatFile = pathinfo($file, PATHINFO_EXTENSION);
-
-    return match ($formatFile) {
+    return match ($extension) {
         'yml', 'yaml' => Yaml::parse($data, Yaml::PARSE_OBJECT_FOR_MAP),
         'json' => json_decode($data),
-        default => throw new \Exception("uknown extension: '{$formatFile}'!"),
+        default => throw new \Exception("uknown extension: '{$extension}'!"),
     };
 }
