@@ -2,7 +2,7 @@
 
 namespace Differ\Formatters\Plain;
 
-function getNormalizeValue(mixed $value): string
+function getNormalizeValue(mixed $value): mixed
 {
     if (is_object($value)) {
         return '[complex value]';
@@ -13,7 +13,11 @@ function getNormalizeValue(mixed $value): string
     } elseif (is_null($value)) {
         return "null";
     } else {
-        return json_encode($value) ? json_encode($value) : "0";
+        $json = json_encode($value);
+        if (empty($json)) {
+            return "0";
+        }
+        return json_encode($value);
     }
 }
 
