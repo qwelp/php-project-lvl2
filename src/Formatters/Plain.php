@@ -7,7 +7,10 @@ function getNormalizeValue(mixed $value): string
     if (is_object($value)) {
         return '[complex value]';
     } elseif (is_string($value)) {
-        return "--- '{$value}'";
+        if ($value == 0) {
+            return "--- " . $value;
+        }
+        return "'{$value}'";
     } elseif (is_bool($value)) {
         return $value ? 'true' : 'false';
     } elseif (is_null($value)) {
