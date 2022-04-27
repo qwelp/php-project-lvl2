@@ -6,20 +6,6 @@ use function Differ\Formatters\formatData;
 use function Differ\Parsers\getDataParsing;
 use function Functional\sort;
 
-function getAbsolutePath(string $path): string
-{
-    $result = getcwd();
-    if ($result === false) {
-        throw new \Exception('Unexpected error!');
-    }
-    return trim($result) . "/{$path}";
-}
-
-function isAbsolutePath(string $path): bool
-{
-    return $path[0] === '/';
-}
-
 function getData(string $pathToFile): array
 {
     if (!file_exists($pathToFile)) {
@@ -32,14 +18,17 @@ function getData(string $pathToFile): array
         throw new \Exception("No file extension!");
     }
 
-    $extension = substr($pathToFile, $indexExtension + 1);
+    $pathinfo = pathinfo($pathToFile);
+    if (empty($pathinfo['extension'])) {
+        throw new \Exception("No file extension!");
+    }
     $data = file_get_contents($pathToFile);
 
     if ($data === false) {
         throw new \Exception("Unexpected error!");
     }
 
-    return ['data' => $data, 'extension' => $extension];
+    return ['data' => $data, 'extension' => $pathinfo['extension']];
 }
 
 function generateAST(object $data1, object $data2): array
@@ -98,11 +87,12 @@ function generateAST(object $data1, object $data2): array
 
 function genDiff(string $path1, string $path2, string $format = 'stylish'): string
 {
-    $pathToFile1 = isAbsolutePath($path1) ? $path1 : getAbsolutePath($path1);
-    $pathToFile2 = isAbsolutePath($path2) ? $path2 : getAbsolutePath($path2);
+    if (!file_exists($path1) && !file_exists($path2)) {
+        throw new \Exception("not file_exists");
+    }
 
-    $data1 = getData($pathToFile1);
-    $data2 = getData($pathToFile2);
+    $data1 = getData($path1);
+    $data2 = getData($path2);
 
     $data = [getDataParsing($data1['data'], $data1['extension']), getDataParsing($data2['data'], $data2['extension'])];
 
