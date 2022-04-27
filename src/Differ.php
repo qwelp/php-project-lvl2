@@ -19,7 +19,7 @@ function getData(string $pathToFile): array
     }
 
     $pathinfo = pathinfo($pathToFile);
-    if (empty($pathinfo['extension'])) {
+    if (!isset($pathinfo['extension'])) {
         throw new \Exception("No file extension!");
     }
     $data = file_get_contents($pathToFile);
