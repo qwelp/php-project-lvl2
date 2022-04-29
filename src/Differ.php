@@ -12,7 +12,7 @@ function getData(string $pathToFile): array
         throw new \Exception("invalid path to file!");
     }
     $pathinfo = pathinfo($pathToFile);
-    $extension = !empty($pathinfo['extension']) ? $pathinfo['extension'] : '';
+    $extension = $pathinfo['extension'] ?? '';
     $data = file_get_contents($pathToFile);
 
     return ['data' => $data, 'extension' => $extension];
