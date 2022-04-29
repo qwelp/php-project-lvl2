@@ -11,24 +11,11 @@ function getData(string $pathToFile): array
     if (!file_exists($pathToFile)) {
         throw new \Exception("invalid path to file!");
     }
-
-    $indexExtension = strrpos($pathToFile, '.');
-
-    if ($indexExtension === false) {
-        throw new \Exception("No file extension!");
-    }
-
     $pathinfo = pathinfo($pathToFile);
-    if (!isset($pathinfo['extension'])) {
-        throw new \Exception("No file extension!");
-    }
+    $extension = !empty($pathinfo['extension']) ? $pathinfo['extension'] : '';
     $data = file_get_contents($pathToFile);
 
-    if ($data === false) {
-        throw new \Exception("Unexpected error!");
-    }
-
-    return ['data' => $data, 'extension' => $pathinfo['extension']];
+    return ['data' => $data, 'extension' => $extension];
 }
 
 function generateAST(object $data1, object $data2): array
@@ -87,10 +74,6 @@ function generateAST(object $data1, object $data2): array
 
 function genDiff(string $path1, string $path2, string $format = 'stylish'): string
 {
-    if (!file_exists($path1) && !file_exists($path2)) {
-        throw new \Exception("not file_exists");
-    }
-
     $data1 = getData($path1);
     $data2 = getData($path2);
 
