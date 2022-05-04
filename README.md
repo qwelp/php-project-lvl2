@@ -3,23 +3,23 @@
 
 ## Шаг 3
 ### Сравнение плоских файлов (JSON)
-[asciinema](https://asciinema.org/a/jKVBAdj1ZR7JZP3g3YfwdhPhJ)
+[![asciicast](https://asciinema.org/a/jKVBAdj1ZR7JZP3g3YfwdhPhJ.svg)](https://asciinema.org/a/jKVBAdj1ZR7JZP3g3YfwdhPhJ)
 
 ## Шаг 5
 ### Сравнение плоских файлов (yaml)
-[asciinema](https://asciinema.org/a/Xz72Qeh9GjfSTd6yV9nCG9wvk)
+[![asciicast](https://asciinema.org/a/Xz72Qeh9GjfSTd6yV9nCG9wvk.svg)](https://asciinema.org/a/Xz72Qeh9GjfSTd6yV9nCG9wvk)
 
 ## Шаг 6
 ### Рекурсивное сравнение
-[asciinema](https://asciinema.org/a/4FdQYH7kIjlrzTaT6dyWaEuOH)
+[![asciicast](https://asciinema.org/a/4FdQYH7kIjlrzTaT6dyWaEuOH.svg)](https://asciinema.org/a/4FdQYH7kIjlrzTaT6dyWaEuOH)
 
 ## Шаг 7
 ### Плоский формат
-[asciinema](https://asciinema.org/a/5yfitNUmJ6iuWYY3XLSqwTosv)
+[![asciicast](https://asciinema.org/a/5yfitNUmJ6iuWYY3XLSqwTosv.svg)](https://asciinema.org/a/5yfitNUmJ6iuWYY3XLSqwTosv)
 
 ## Шаг 8
 ### Вывод в json
-[asciinema](https://asciinema.org/a/PJYisaz0drPRUHlGJbe3Nb2Fi)
+[![asciicast](https://asciinema.org/a/PJYisaz0drPRUHlGJbe3Nb2Fi.svg)](https://asciinema.org/a/PJYisaz0drPRUHlGJbe3Nb2Fi)
 
 ### Hexlet tests and linter status:
 [![PHP CI](https://github.com/qwelp/php-project-lvl2/actions/workflows/workflow.yml/badge.svg)](https://github.com/qwelp/php-project-lvl2/actions/workflows/workflow.yml)

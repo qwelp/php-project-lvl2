@@ -43,13 +43,14 @@ function plainFormatter(array $tree): string
 
                 if ($type === 'added') {
                     return "{$template} added with value: {$updatedValue1}";
-                } elseif ($type === 'removed') {
-                    return "{$template} removed";
-                } elseif ($type === 'changed') {
-                    return "{$template} updated. From {$updatedValue1} to {$updatedValue2}";
-                } else {
-                    return '';
                 }
+                if ($type === 'removed') {
+                    return "{$template} removed";
+                }
+                if ($type === 'changed') {
+                    return "{$template} updated. From {$updatedValue1} to {$updatedValue2}";
+                }
+                return '';
             }
         },
         $tree);

@@ -4,7 +4,6 @@ namespace Differ\Formatters\Stylish;
 
 function stylish(array $tree, string $replacer = ' ', int $spaceCount = 4, int $startIndentSize = 2): string
 {
-
     $iter = function ($tree, $indentSize, $innerIter) use (&$iter, $replacer, $spaceCount) {
 
         if (!is_array($tree)) {
