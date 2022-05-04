@@ -12,7 +12,7 @@ class DifferTest extends TestCase
     {
         return __DIR__ . '/fixtures/' . $name;
     }
-    
+
     /**
      * @dataProvider formatProvider
      */
@@ -22,7 +22,7 @@ class DifferTest extends TestCase
         $expected = file_get_contents($this->getFilePath('diff.stylish'));
         $this->assertEquals($expected, $actual);
     }
-    
+
     /**
      * @dataProvider formatProvider
      */
@@ -32,7 +32,7 @@ class DifferTest extends TestCase
         $expected = file_get_contents($this->getFilePath('diff.stylish'));
         $this->assertEquals($expected, $actual);
     }
-    
+
     /**
      * @dataProvider formatProvider
      */
@@ -42,7 +42,7 @@ class DifferTest extends TestCase
         $expected = file_get_contents($this->getFilePath('diff.plain'));
         $this->assertEquals($expected, $actual);
     }
-    
+
     /**
      * @dataProvider formatProvider
      */
@@ -52,7 +52,7 @@ class DifferTest extends TestCase
         $expected = file_get_contents($this->getFilePath('diff.json'));
         $this->assertEquals($expected, $actual);
     }
-    
+
     public function formatProvider(): array
     {
         return [
