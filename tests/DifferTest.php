@@ -16,9 +16,11 @@ class DifferTest extends TestCase
     /**
      * @dataProvider formatProvider
      */
-    public function testDefault(string $file1, string $file2): void
+    public function testDefault(string $format): void
     {
-        $actual = genDiff($this->getFilePath($file1), $this->getFilePath($file2));
+        $filepath1 = $this->getFilePath("file1.{$format}");
+        $filepath2 = $this->getFilePath("file2.{$format}");
+        $actual = genDiff($filepath1, $filepath2);
         $expected = file_get_contents($this->getFilePath('diff.stylish'));
         $this->assertEquals($expected, $actual);
     }
@@ -26,9 +28,11 @@ class DifferTest extends TestCase
     /**
      * @dataProvider formatProvider
      */
-    public function testStylish(string $file1, string $file2): void
+    public function testStylish(string $format): void
     {
-        $actual = genDiff($this->getFilePath($file1), $this->getFilePath($file2), 'stylish');
+        $filepath1 = $this->getFilePath("file1.{$format}");
+        $filepath2 = $this->getFilePath("file2.{$format}");
+        $actual = genDiff($filepath1, $filepath2, 'stylish');
         $expected = file_get_contents($this->getFilePath('diff.stylish'));
         $this->assertEquals($expected, $actual);
     }
@@ -36,9 +40,11 @@ class DifferTest extends TestCase
     /**
      * @dataProvider formatProvider
      */
-    public function testPlain(string $file1, string $file2): void
+    public function testPlain(string $format): void
     {
-        $actual = genDiff($this->getFilePath($file1), $this->getFilePath($file2), 'plain');
+        $filepath1 = $this->getFilePath("file1.{$format}");
+        $filepath2 = $this->getFilePath("file2.{$format}");
+        $actual = genDiff($filepath1, $filepath2, 'plain');
         $expected = file_get_contents($this->getFilePath('diff.plain'));
         $this->assertEquals($expected, $actual);
     }
@@ -46,9 +52,11 @@ class DifferTest extends TestCase
     /**
      * @dataProvider formatProvider
      */
-    public function testJson(string $file1, string $file2): void
+    public function testJson(string $format): void
     {
-        $actual = genDiff($this->getFilePath($file1), $this->getFilePath($file2), 'json');
+        $filepath1 = $this->getFilePath("file1.{$format}");
+        $filepath2 = $this->getFilePath("file2.{$format}");
+        $actual = genDiff($filepath1, $filepath2, 'json');
         $expected = file_get_contents($this->getFilePath('diff.json'));
         $this->assertEquals($expected, $actual);
     }
@@ -56,8 +64,8 @@ class DifferTest extends TestCase
     public function formatProvider(): array
     {
         return [
-            ['file1.json', 'file2.json'],
-            ['file1.yml', 'file2.yml']
+            ['json'],
+            ['yml']
         ];
     }
 }
