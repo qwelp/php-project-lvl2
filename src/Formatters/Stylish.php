@@ -37,25 +37,28 @@ function stylish(array $tree, string $replacer = ' ', int $spaceCount = 4, int $
 
                     if ($type === 'node') {
                         return "{$currentIndent}  {$key}: {$iter($node['children'], $newIndentSize, $innerIter)}";
-                    } else {
-                        $value1 = $node['value'];
-                        $normalizeBefore = is_object($value1) ? (array) $value1 : $value1;
-                        $before = $iter($normalizeBefore, $newIndentSize, true);
-
-                        $value2 = $type === 'changed' ? $node['value2'] : '';
-                        $normalizeAfter = is_object($value2) ? (array) $value2 : $value2;
-                        $after = $iter($normalizeAfter, $newIndentSize, true);
-
-                        if ($type === 'added') {
-                            return "{$currentIndent}+ {$key}: {$before}";
-                        } elseif ($type === 'removed') {
-                            return "{$currentIndent}- {$key}: {$before}";
-                        } elseif ($type === 'changed') {
-                            return "{$currentIndent}- {$key}: {$before}\n{$currentIndent}+ {$key}: {$after}";
-                        } else {
-                            return "{$currentIndent}  {$key}: {$before}";
-                        }
                     }
+
+                    $value1 = $node['value'];
+                    $normalizeBefore = is_object($value1) ? (array) $value1 : $value1;
+                    $before = $iter($normalizeBefore, $newIndentSize, true);
+
+                    $value2 = $type === 'changed' ? $node['value2'] : '';
+                    $normalizeAfter = is_object($value2) ? (array) $value2 : $value2;
+                    $after = $iter($normalizeAfter, $newIndentSize, true);
+
+                    if ($type === 'added') {
+                        return "{$currentIndent}+ {$key}: {$before}";
+                    }
+
+                    if ($type === 'removed') {
+                        return "{$currentIndent}- {$key}: {$before}";
+                    }
+
+                    if ($type === 'changed') {
+                        return "{$currentIndent}- {$key}: {$before}\n{$currentIndent}+ {$key}: {$after}";
+                    }
+                    return "{$currentIndent}  {$key}: {$before}";
                 },
                 $tree
             );
@@ -65,6 +68,5 @@ function stylish(array $tree, string $replacer = ' ', int $spaceCount = 4, int $
 
         return implode("\n", $result);
     };
-
     return $iter($tree, $startIndentSize, false);
 }
